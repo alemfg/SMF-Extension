@@ -1,4 +1,6 @@
-#include </usr/share/idl/libreoffice/com/sun/star/uno/XInterface.idl>
+// #include </usr/share/idl/libreoffice/com/sun/star/uno/XInterface.idl>
+// #include </usr/local/share/libreoffice/idl/com/sun/star/uno/XInterface.idl>
+// /Volumes/Z77ExtremeHDD/Users/dhocker/Source/LibreOffice5.0_SDK/idl/com/sun/star/uno
 
 module com { module smf { module ticker { module getinfo {
 
@@ -9,7 +11,8 @@ module com { module smf { module ticker { module getinfo {
       any getMorningKey( [in] string a, [in] any b );
       any getMorningFin( [in] string a, [in] any b );
       any getMorningQFin( [in] string a, [in] any b );
-      any getADVFN( [in] string a, [in] any b );
+      // ticker, date, data name (e.g. close)
+      any getYahooHist( [in] string a, [in] string b, [in] string c );
     };
 
 }; }; }; };

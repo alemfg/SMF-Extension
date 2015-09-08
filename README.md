@@ -17,6 +17,7 @@ GETYAHOO(Ticker,Datacode)
 GETMORNINGKEY(Ticker,Datacode) 
 GETMORNINGFIN(Ticker,Datacode)
 GETMORNINGQFIN(Ticker,Datacode)
+GETYAHOOHIST(Ticker, Date, Datacode)
 ```  
 
 Quotes **must** be used when entering the ticker directly ex: ```GETYAHOO("AAPL",1)```, but are **not** needed when referencing another cell ex: ```GETYAHOO(A1,1)```.
@@ -48,6 +49,7 @@ The SMF Extension is released under the [![][shield:LGPL3]][License:3.0] which i
 * Villeroy - conversion from string to float to make the extension useful
 * karolus - optimization of keymapping code
 * Corey Goldberg - Inspiration with the Yahoo portion of the extension
+* Dave Hocker - Yahoo Finanacial Historical data support
 
 [GIT:release]: http://github.com/madsailor/SMF-Extension/releases/latest
 [License:3.0]: http://www.gnu.org/licenses/lgpl.html

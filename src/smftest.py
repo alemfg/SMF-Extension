@@ -9,6 +9,14 @@
 #  License as published by the Free Software Foundation; either
 #  version 3 of the License, or (at your option) any later version.
 #
+# Running the Tests
+#
+# Open a terminal.
+# Set up SDK: /usr/local/share/libreoffice/setsdkenv_unix
+# Change to your source folder: cd ~/Source/SMF-Extension/src
+# Run: $UNO_PATH/python smftest.py -f yahoohist -t XOM -d 2015-07-31
+#
+
 from __future__ import print_function
 import sys
 import os
@@ -34,8 +42,9 @@ def main(argv):
     main_smf = smf.SmfImpl(argv)
     arg_funct = ''
     arg_ticker = ''
+    arg_date = ''
     try:
-        opts, args = getopt.getopt(argv, "f:t:",["function=","ticker="])
+        opts, args = getopt.getopt(argv, "f:t:d:",["function=","ticker=","date="])
     except getopt.GetoptError:
         usage(2)
     for opt, arg in opts:
@@ -45,8 +54,11 @@ def main(argv):
             arg_funct = arg
         elif opt in ("-t", "--ticker"):
             arg_ticker = arg
+        elif opt in ("-d", "--date"):
+            arg_date = arg
     print ("Function tested is", arg_funct)
     print ("Ticker used is", arg_ticker)
+    print ("Date used is", arg_date)
     if arg_funct == "morningkey":
         key_test(main_smf, arg_ticker)
     elif arg_funct == "morningfin":
@@ -57,6 +69,8 @@ def main(argv):
         yahoo_test(main_smf, arg_ticker)
     elif arg_funct == "advfn":
         advfn_test(main_smf, arg_ticker)
+    elif arg_funct == "yahoohist":
+        yahoohist_test(main_smf, arg_ticker, arg_date)
     sys.exit(2)
 
 def key_test(smf_py, ticker):
@@ -102,10 +116,16 @@ def advfn_test(smf_py, ticker):
         datacode = test_data[1 + val]
         print (datacode,': ', smf_py.getADVFN(ticker, datacode))
     sys.exit()
-        
+
+def yahoohist_test(smf_py, ticker, tgtdate):
+    datacodes = ["Symbol", "Date", "Open", "High", "Low", "Close", "Volume", "Adj_Close"]
+    for datacode in datacodes:
+        print (datacode,': ', smf_py.getYahooHist(ticker, tgtdate, datacode))
+    sys.exit()
+
 def usage(err):
-    print ("Usage: smftest.py -f <function> -t <ticker>")
-    print ('Available functions are morningkey, morningfin, morningqfin, yahoo'
+    print ("Usage: smftest.py -f <function> -t <ticker> -d <yyyy-mm-dd>")
+    print ('Available functions are morningkey, morningfin, morningqfin, yahoo, yahoohist'
            'and advfn')
     if err == 2:
         sys.exit(2)

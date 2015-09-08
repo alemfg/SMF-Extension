@@ -2,7 +2,10 @@
 
 #Import tools for compiling extension binaries
 export PATH=$PATH:/usr/lib/ure/bin/
-export PATH=$PATH:/usr/lib/libreoffice/sdk/bin/
+# My LO SDK tools were not here.
+#export PATH=$PATH:/usr/lib/libreoffice/sdk/bin/
+# They were here...
+export PATH=$PATH:/usr/local/share/libreoffice/bin
 
 #Setup directories 
 mkdir "${PWD}"/SMF/
@@ -17,8 +20,7 @@ rm "${PWD}"/idl/Xsmf.urd
 cp -f "${PWD}"/src/smf.py "${PWD}"/SMF/
 cp -f "${PWD}"/src/morningstar.py "${PWD}"/SMF/
 cp -f "${PWD}"/src/yahoo.py "${PWD}"/SMF/
-cp -f "${PWD}"/src/advfn.py "${PWD}"/SMF/
-cp -f "${PWD}"/src/description-en-US.txt "${PWD}"/SMF/
+cp -f "${PWD}"/src/yahoo_hist.py "${PWD}"/SMF/
 python "${PWD}"/src/generate_metainfo.py
 
 #Package into oxt file
