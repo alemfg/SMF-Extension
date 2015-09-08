@@ -15,7 +15,6 @@
 import urllib.request
 import urllib.parse
 import json
-import datetime
 
 
 def fetch_data(self, ticker, tgtdate, datacode):
@@ -24,24 +23,43 @@ def fetch_data(self, ticker, tgtdate, datacode):
     :param ticker: string - stock ticker symbol (e.g XOM)
     :param tgtdate: string or float (libreoffice date) - for date of interest
     :param datacode: string - name of data to be retrieved (Symbol, Date, Open, High, Low, Close, Volume, Adj_Close)
-    :return:
+    :return: For numeric values returns a float. Otherwise, returns a string.
     """
 
     # Resolve date
     # This was an attempt to support LO date types. However,
-    # I could not figure out how dates worked.
+    # I could not figure out how dates worked and I could find no examples to shed light on the subject.
     if type(tgtdate) == float:
         # LibreOffice date as a float
-        base_date = datetime.date(1900, 1, 1)
-        delta_date = datetime.timedelta(int(tgtdate))
-        act_date = base_date + delta_date
-        eff_date = act_date.strftime("%Y-%m-%d")
+        # base_date = datetime.date(1900, 1, 1)
+        # delta_date = datetime.timedelta(int(tgtdate))
+        # act_date = base_date + delta_date
+        # eff_date = act_date.strftime("%Y-%m-%d")
+        return "Date format not supported"
     else:
         # Assumed to be a string in ISO format.
         # The IDL actually forces this to be a string.
         eff_date = tgtdate
 
-    # Build up url
+    # Coerce datacode to Xxxxxx...We know that but the user may not get it right
+    if datacode.lower() == "adj_close":
+        c_datacode = "Adj_Close"
+    else:
+        c_datacode = datacode.capitalize()
+
+    # Look for cache hit first...
+    # Since historical data should be constant, only one web call is
+    # needed for a ticker/date combination.
+    if ticker in self.yahoo_hist_cache and eff_date in self.yahoo_hist_cache[ticker]:
+        cv = self.yahoo_hist_cache[ticker][eff_date][c_datacode]
+        try:
+            v = float(cv)
+        except:
+            v = str(cv)
+        return  v
+
+    # There was no cache it, so we must go to Yahoo to get the historical data
+    # Build up url for query
     urlbase = 'https://query.yahooapis.com/v1/public/yql?'
     urlquery ='q=select * from yahoo.finance.historicaldata where symbol in ("{symbol}") and startDate = "{startdate}" and endDate = "{enddate}"&format=json&env=store://datatables.org/alltableswithkeys&callback='
 
@@ -61,12 +79,6 @@ def fetch_data(self, ticker, tgtdate, datacode):
     # The response is json formatted
     j = json.loads(rs)
 
-    # Coerce datacode to Xxxxxx...We know that but the user may not get it right
-    if datacode.lower() == "adj_close":
-        c_datacode = "Adj_Close"
-    else:
-        c_datacode = datacode.capitalize()
-
     # NOTE: If multiple symbols are specified in the "in" clause,
     # the quote property will be an array of dicts instead of a single
     # dict.
@@ -75,6 +87,8 @@ def fetch_data(self, ticker, tgtdate, datacode):
         # quote is a list
         lst = []
         for q in qr:
+            self.yahoo_hist_cache[ticker] = {}
+            self.yahoo_hist_cache[ticker][tgtdate] = q
             try:
                 v = float(q[c_datacode])
             except:
@@ -84,6 +98,8 @@ def fetch_data(self, ticker, tgtdate, datacode):
     else:
         # quote is:, type(j["query"]["results"]["quote"])
         q = qr
+        self.yahoo_hist_cache[ticker] = {}
+        self.yahoo_hist_cache[ticker][tgtdate] = q
         try:
             v = float(q[c_datacode])
         except:

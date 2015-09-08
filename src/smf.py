@@ -38,12 +38,13 @@ class SmfImpl(unohelper.Base, XSmf ):
         self.financial_flag = ['0', '']
         self.qfinancial_flag = ['0', '']
         self.advfn_flag = ['0', '']
+        self.yahoo_hist_cache = {}
     #Following functions are called and mapped by LO through the Xsmf.rdb file.
     def getYahooHist( self, ticker, tgtdate, datacode ):
         try:
             x = yahoo_hist.fetch_data(self, ticker, tgtdate, datacode)
         except Exception as ex:
-            x = ex.message
+            x = str(ex)
         return x
 
     def getYahoo( self, ticker, datacode ):
