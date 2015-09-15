@@ -50,13 +50,15 @@ def fetch_data(self, ticker, tgtdate, datacode):
     # Look for cache hit first...
     # Since historical data should be constant, only one web call is
     # needed for a ticker/date combination.
-    if ticker in self.yahoo_hist_cache and eff_date in self.yahoo_hist_cache[ticker]:
-        cv = self.yahoo_hist_cache[ticker][eff_date][c_datacode]
+    cr = __lookup_symbol_by_date(ticker, eff_date)
+    if cr:
+        print ("Cache hit")
+        cv = cr[c_datacode]
         try:
             v = float(cv)
         except:
             v = str(cv)
-        return  v
+        return v
 
     # There was no cache it, so we must go to Yahoo to get the historical data
     # Build up url for query
@@ -87,8 +89,7 @@ def fetch_data(self, ticker, tgtdate, datacode):
         # quote is a list
         lst = []
         for q in qr:
-            self.yahoo_hist_cache[ticker] = {}
-            self.yahoo_hist_cache[ticker][tgtdate] = q
+            __insert_symbol(q["symbol"], eff_date, q["open"], q["high"], q["low"], q["close"], q["volume"], q["adj_close"])
             try:
                 v = float(q[c_datacode])
             except:
@@ -98,8 +99,8 @@ def fetch_data(self, ticker, tgtdate, datacode):
     else:
         # quote is:, type(j["query"]["results"]["quote"])
         q = qr
-        self.yahoo_hist_cache[ticker] = {}
-        self.yahoo_hist_cache[ticker][tgtdate] = q
+        print ("Cache insert")
+        __insert_symbol(ticker, eff_date, q["Open"], q["High"], q["Low"], q["Close"], q["Volume"], q["Adj_Close"])
         try:
             v = float(q[c_datacode])
         except:
@@ -107,3 +108,79 @@ def fetch_data(self, ticker, tgtdate, datacode):
         return  v
 
     return "yahoo_hist unexpected error"
+
+
+import sqlite3
+import os
+
+def __open_yh_cache():
+    """
+    Open a connection to the cache DB. Create the DB if it does not exist.
+    :return: Database connection.
+    """
+    # Determine cache location based on underlying OS
+    file_name = "smf_yh_cache.sqlite3"
+    if os.name == "posix":
+        # Linux or OS X
+        file_path = "{0}/libreoffice/smf/".format(os.environ["HOME"])
+    elif os.name == "nt":
+        # windows
+        file_path = "{0}\\libreoffice\\smf\\".format(os.environ["LOCALAPPDATA"])
+
+    # Make the folder
+    if not os.path.exists(file_path):
+        print ("Create directory")
+        os.makedirs(file_path)
+
+    full_file_path = file_path + file_name
+
+    # If DB does not exist, create it
+    if not os.path.exists(full_file_path):
+        print ("Create database")
+        conn = sqlite3.connect(full_file_path)
+        conn.execute("CREATE TABLE SymbolDate (Symbol text not null, Date text not null, Open real, High real, Low real, Close real, Volume integer, Adj_Close real, PRIMARY KEY(Symbol,Date))")
+    else:
+        conn = sqlite3.connect(full_file_path)
+
+    # We use the row factory to get named row columns. Makes handling row sets easier.
+    conn.row_factory = sqlite3.Row
+    # The default string type is unicode. This changes it to UTF-8.
+    conn.text_factory = str
+
+    # return connection to the cache DB
+    return conn
+
+
+def __lookup_symbol_by_date(symbol, tgtdate):
+    """
+    Look up cached historical data for a given symbol/date pair.
+    :param symbol:
+    :param tgtdate:
+    :return: Returns the cached DB record. If no record is found, returns None.
+    """
+    conn = __open_yh_cache()
+    rset = conn.execute("SELECT * from SymbolDate where Symbol=? and Date=?", [symbol, tgtdate])
+    r = rset.fetchone()
+    conn.close()
+    # r will be None if no record was found
+    return r
+
+
+def __insert_symbol(symbol, tgtdate, open, high, low, close, volume, adj_close):
+    """
+    Insert a new cache record in the cache DB.
+    :param symbol:
+    :param tgtdate:
+    :param open:
+    :param high:
+    :param low:
+    :param close:
+    :param volume:
+    :param adj_close:
+    :return:
+    """
+    conn = __open_yh_cache()
+    print ("Cache data:", symbol, tgtdate, open, high, low, close, volume, adj_close)
+    conn.execute("INSERT INTO SymbolDate values (?,?,?,?,?,?,?,?)", [symbol, tgtdate, open, high, low, close, volume, adj_close])
+    conn.commit()
+    conn.close()
