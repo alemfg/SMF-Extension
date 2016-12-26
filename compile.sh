@@ -2,10 +2,12 @@
 
 #Import tools for compiling extension binaries
 export PATH=$PATH:/usr/lib/ure/bin/
+#export PATH=$PATH:/Applications/Contents/Frameworks
 # My LO SDK tools were not here.
 #export PATH=$PATH:/usr/lib/libreoffice/sdk/bin/
 # They were here...
-export PATH=$PATH:/usr/local/share/libreoffice/bin
+#export PATH=$PATH:/usr/local/share/libreoffice/bin
+export PATH=$PATH:/Users/dhocker/LibreOffice5.2_SDK/bin
 
 #Setup directories 
 mkdir "${PWD}"/SMF/

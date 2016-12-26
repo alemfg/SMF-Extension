@@ -1,16 +1,27 @@
-Notes on Building SMF
----------------------
+Notes on Building SMF-Extension under macOS
+-------------------------------------------
 
 Consider creating a Python3 virtualenv for working with the extension.
 I created one named lo-smf. You can test your code outside of the
 world of LO.
 
-Run: /usr/local/share/libreoffice/setsdkenv_unix
-to create an SDK environment. This step starts a new bash instance and
-sets up a number of environment variables and essentially creates its own environment.
+NOTE: Depending on your macOS version you may need to fully disable SIP.
 
-cd ~/Source/SMF-Extension
-./compile.sh
+Install the LibreOffice SDK. As of LibreOffice 5.2.4, the SDK is merely a directory
+in the ditribution .dmg file. Copy the SDK directory to a preferred location
+such as your home directory. For purposes of example, consider the SDK copied to
+~/LibreOffice5.2_SDK.
+
+Run the environment/configuration script.
+	cd ~/LibreOffice5.2_SDK
+	./setsdkenv_unix
+	
+The first time this script is run it will ask a number of questions. The default
+answers chould be adquate. When the script finishes you will be in a new bash shell.
+
+Change to your SMF directory and run the build.
+	cd ~/Source/SMF-Extension
+	./compile.sh
 
 Output from compile script looks like this:
 
@@ -35,6 +46,7 @@ Add Extension to LibreOffice
 
 Open LibreOffice Calc
 Menu: Tools/Extension Manager
+Remove the existing SMF extension (if it exists).
 Click the Add button.
 Navigate to the ~/Source/SMF-Extension directory.
 Choose SMF.oxt

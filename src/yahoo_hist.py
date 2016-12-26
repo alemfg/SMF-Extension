@@ -12,6 +12,7 @@
 
 # Python 3
 
+import ssl
 import urllib.request
 import urllib.parse
 import json
@@ -70,8 +71,10 @@ def fetch_data(self, ticker, tgtdate, datacode):
     url = urlbase + urllib.parse.quote(urlquery1, safe='/=&:')
 
     try:
+        # At some point between LO version 5.0.0.5 and 5.2.4, changes to the embedded python were made
+        # and the urlopen() method no longer worked. Supplying a context seemed to fix the problem.
         req = urllib.request.Request(url)
-        response = urllib.request.urlopen(req)
+        response = urllib.request.urlopen(req, context=ssl.create_default_context(ssl.Purpose.CLIENT_AUTH))
     except Exception as ex:
         return str(ex)
 
