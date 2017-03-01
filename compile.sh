@@ -8,6 +8,9 @@ export PATH=$PATH:/usr/lib/ure/bin/
 # They were here...
 #export PATH=$PATH:/usr/local/share/libreoffice/bin
 export PATH=$PATH:/Users/dhocker/LibreOffice5.2_SDK/bin
+# This addition was required to make the script work with
+# SDK 5.2
+export DYLD_LIBRARY_PATH=$OO_SDK_URE_LIB_DIR
 
 #Setup directories 
 mkdir "${PWD}"/SMF/
