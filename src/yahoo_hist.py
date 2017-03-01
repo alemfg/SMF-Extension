@@ -16,6 +16,7 @@ import ssl
 import urllib.request
 import urllib.parse
 import json
+import sys
 
 
 def fetch_data(self, ticker, tgtdate, datacode):
@@ -74,7 +75,12 @@ def fetch_data(self, ticker, tgtdate, datacode):
         # At some point between LO version 5.0.0.5 and 5.2.4, changes to the embedded python were made
         # and the urlopen() method no longer worked. Supplying a context seemed to fix the problem.
         req = urllib.request.Request(url)
-        response = urllib.request.urlopen(req, context=ssl.create_default_context(ssl.Purpose.CLIENT_AUTH))
+        # This is an attempt to account for the different versions of python that 
+        # are imbedded in LibreOffice
+        if sys.version_info >= (3,4,0):
+            response = urllib.request.urlopen(req, context=ssl.create_default_context(ssl.Purpose.CLIENT_AUTH))
+        else:
+            response = urllib.request.urlopen(req)
     except Exception as ex:
         return str(ex)
 
