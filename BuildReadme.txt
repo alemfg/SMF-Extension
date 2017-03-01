@@ -1,5 +1,8 @@
-Notes on Building SMF-Extension under macOS
--------------------------------------------
+Notes on Building SMF-Extension
+-------------------------------
+
+macOS
+-----
 
 Consider creating a Python3 virtualenv for working with the extension.
 I created one named lo-smf. You can test your code outside of the
@@ -58,7 +61,15 @@ that was created by the setsdkenv_unix script.
 Running the Tests
 -----------------
 
+macOS
+-----
+
 Open a terminal.
-Run: /usr/local/share/libreoffice/setsdkenv_unix
+Run: ~/LibreOffice5.2_SDK/setsdkenv_unix
 Run: cd ~/Source/SMF-Extension/src #change directory to your source
-Run: $UNO_PATH/python smftest.py -f yahoohist -t XOM -d 2015-07-31
+Run: /Applications/LibreOffice.app/Contents/Resources/python smftest.py -f yahoohist -t XOM -d 2017-02-27
+
+Windows
+-------
+
+TBD
