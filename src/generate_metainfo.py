@@ -16,7 +16,7 @@ cur_dir = os.getcwd()
 
 # A unique ID for the extension.
 addin_id = "com.smf.ticker.getinfo"
-addin_version = "0.7.10"
+addin_version = "0.8.1"
 addin_displayname = "Stock Market Function Extension."
 addin_publisher_link = "https://github.com/madsailor/SMF-Extension"
 addin_publisher_name = "David Capron, TheAgency"
@@ -115,6 +115,10 @@ define_function(smf_xml, \
 define_function(smf_xml, \
     'getYahooHist', 'Fetches Yahoo Financial Historical Data', \
     [('a', 'The ticker symbol.'), ('b', 'The date.'), ('c', 'The data name or code.')])
+
+define_function(smf_xml, \
+    'getHistoricalQuote', 'Fetches Historical Closing Quote', \
+    [('a', 'The ticker symbol.'), ('b', 'The date.')])
 
 smf_xml.write('</node>\n')
 smf_xml.write('</node>\n')

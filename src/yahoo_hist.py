@@ -9,6 +9,11 @@
 #  License as published by the Free Software Foundation; either
 #  version 3 of the License, or (at your option) any later version.
 #
+# WARNING WARNING WARNING
+# Yahoo terminated the service that provided historical quotes somewhere
+# around 5/15/2017. This function will only work for historical quotes
+# that have been captured and cached BEFORE Yahoo terminated the service.
+#
 
 # Python 3
 
@@ -17,6 +22,8 @@ import urllib.request
 import urllib.parse
 import json
 import sys
+import urllib.error
+import datetime
 
 
 def fetch_data(self, ticker, tgtdate, datacode):
@@ -62,62 +69,9 @@ def fetch_data(self, ticker, tgtdate, datacode):
             v = str(cv)
         return v
 
-    # There was no cache it, so we must go to Yahoo to get the historical data
-    # Build up url for query
-    urlbase = 'https://query.yahooapis.com/v1/public/yql?'
-    urlquery ='q=select * from yahoo.finance.historicaldata where symbol in ("{symbol}") and startDate = "{startdate}" and endDate = "{enddate}"&format=json&env=store://datatables.org/alltableswithkeys&callback='
+    # Todo Use Google to get historical data
 
-    # The symbol string is everything between the quotes in "{symbol}"
-    urlquery1 = urlquery.replace("{symbol}", ticker).replace("{startdate}", eff_date).replace("{enddate}", eff_date)
-    url = urlbase + urllib.parse.quote(urlquery1, safe='/=&:')
-
-    try:
-        # At some point between LO version 5.0.0.5 and 5.2.4, changes to the embedded python were made
-        # and the urlopen() method no longer worked. Supplying a context seemed to fix the problem.
-        req = urllib.request.Request(url)
-        # This is an attempt to account for the different versions of python that 
-        # are imbedded in LibreOffice
-        if sys.version_info >= (3,4,0):
-            response = urllib.request.urlopen(req, context=ssl.create_default_context(ssl.Purpose.CLIENT_AUTH))
-        else:
-            response = urllib.request.urlopen(req)
-    except Exception as ex:
-        return str(ex)
-
-    # The response is a byte string which we convert to a character string
-    bytes = response.read()
-    rs = bytes.decode("utf-8")
-    # The response is json formatted
-    j = json.loads(rs)
-
-    # NOTE: If multiple symbols are specified in the "in" clause,
-    # the quote property will be an array of dicts instead of a single
-    # dict.
-    qr = j["query"]["results"]["quote"]
-    if type(qr) == list:
-        # quote is a list
-        lst = []
-        for q in qr:
-            __insert_symbol(q["symbol"], eff_date, q["open"], q["high"], q["low"], q["close"], q["volume"], q["adj_close"])
-            try:
-                v = float(q[c_datacode])
-            except:
-                v = str(q[c_datacode])
-            lst.append(v)
-        return lst
-    else:
-        # quote is:, type(j["query"]["results"]["quote"])
-        q = qr
-        print ("Cache insert")
-        __insert_symbol(ticker, eff_date, q["Open"], q["High"], q["Low"], q["Close"], q["Volume"], q["Adj_Close"])
-        try:
-            v = float(q[c_datacode])
-        except:
-            v = str(q[c_datacode])
-        return  v
-
-    return "yahoo_hist unexpected error"
-
+    return "N/A"
 
 import sqlite3
 import os
@@ -193,3 +147,70 @@ def __insert_symbol(symbol, tgtdate, open, high, low, close, volume, adj_close):
     conn.execute("INSERT INTO SymbolDate values (?,?,?,?,?,?,?,?)", [symbol, tgtdate, open, high, low, close, volume, adj_close])
     conn.commit()
     conn.close()
+
+
+def __get_yahoo_hist():
+    """
+    # The original method for getting historical data from Yahoo. Yahoo terminated the
+    # service somewhere arount 5/15/2017.
+
+    # There was no cache it, so we must go to Yahoo to get the historical data
+    # Build up url for query
+    urlbase = 'https://query.yahooapis.com/v1/public/yql?'
+    urlquery ='q=select * from yahoo.finance.historicaldata where symbol in ("{symbol}") and startDate = "{startdate}" and endDate = "{enddate}"&format=json&env=store://datatables.org/alltableswithkeys&callback='
+    # https://query.yahooapis.com/v1/public/yql?q=select * from yahoo.finance.historicaldata where symbol in ("VOO") and startDate = "2017-05-30" and endDate = "2017-05-30"&format=json&env=store://datatables.org/alltableswithkeys&callback=
+
+    # The symbol string is everything between the quotes in "{symbol}"
+    urlquery1 = urlquery.replace("{symbol}", ticker).replace("{startdate}", eff_date).replace("{enddate}", eff_date)
+    print (urlbase + urlquery1)
+    url = urlbase + urllib.parse.quote(urlquery1, safe='/=&:')
+
+    try:
+        # At some point between LO version 5.0.0.5 and 5.2.4, changes to the embedded python were made
+        # and the urlopen() method no longer worked. Supplying a context seemed to fix the problem.
+        req = urllib.request.Request(url)
+        # This is an attempt to account for the different versions of python that
+        # are imbedded in LibreOffice
+        if sys.version_info >= (3,4,0):
+            response = urllib.request.urlopen(req, context=ssl.create_default_context(ssl.Purpose.CLIENT_AUTH))
+        else:
+            response = urllib.request.urlopen(req)
+    except Exception as ex:
+        return str(ex)
+
+    # The response is a byte string which we convert to a character string
+    bytes = response.read()
+    rs = bytes.decode("utf-8")
+    # The response is json formatted
+    j = json.loads(rs)
+
+    # NOTE: If multiple symbols are specified in the "in" clause,
+    # the quote property will be an array of dicts instead of a single
+    # dict.
+    qr = j["query"]["results"]["quote"]
+    print (qr)
+    if type(qr) == list:
+        # quote is a list
+        lst = []
+        for q in qr:
+            __insert_symbol(q["symbol"], eff_date, q["open"], q["high"], q["low"], q["close"], q["volume"], q["adj_close"])
+            try:
+                v = float(q[c_datacode])
+            except:
+                v = str(q[c_datacode])
+            lst.append(v)
+        return lst
+    else:
+        # quote is:, type(j["query"]["results"]["quote"])
+        q = qr
+        print ("Cache insert")
+        __insert_symbol(ticker, eff_date, q["Open"], q["High"], q["Low"], q["Close"], q["Volume"], q["Adj_Close"])
+        try:
+            v = float(q[c_datacode])
+        except:
+            v = str(q[c_datacode])
+        return  v
+
+    return "yahoo_hist unexpected error"
+    """
+    pass

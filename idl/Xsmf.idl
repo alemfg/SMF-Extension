@@ -13,6 +13,8 @@ module com { module smf { module ticker { module getinfo {
       any getMorningQFin( [in] string a, [in] any b );
       // ticker, date, data name (e.g. close)
       any getYahooHist( [in] string a, [in] string b, [in] string c );
+      // ticker, date
+      any getHistoricalQuote( [in] string a, [in] string b );
     };
 
 }; }; }; };

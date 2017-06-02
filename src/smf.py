@@ -20,10 +20,16 @@ cmd_folder = os.path.realpath(os.path.abspath
                                              ( inspect.currentframe() ))[0]))
 if cmd_folder not in sys.path:
     sys.path.insert(0, cmd_folder)
+
+sites_folder = "/usr/local/lib/python3.6/site-packages"
+# if sites_folder not in sys.path:
+#     sys.path.insert(0, sites_folder)
+
 import yahoo
 import morningstar
 #import advfn
 import yahoo_hist
+import html_hist_quote
 
 class SmfImpl(unohelper.Base, XSmf ):
     """Define the main class for the SMF extension """    
@@ -40,6 +46,12 @@ class SmfImpl(unohelper.Base, XSmf ):
         self.advfn_flag = ['0', '']
         self.yahoo_hist_cache = {}
     #Following functions are called and mapped by LO through the Xsmf.rdb file.
+    def getHistoricalQuote( self, ticker, tgtdate ):
+        try:
+            x = html_hist_quote.fetch_data(self, ticker, tgtdate)
+        except Exception as ex:
+            x = str(ex)
+        return x
     def getYahooHist( self, ticker, tgtdate, datacode ):
         try:
             x = yahoo_hist.fetch_data(self, ticker, tgtdate, datacode)
@@ -92,3 +104,9 @@ g_ImplementationHelper = unohelper.ImplementationHelper()
 g_ImplementationHelper.addImplementation( \
     createInstance,"com.smf.ticker.getinfo.python.SmfImpl",
         ("com.sun.star.sheet.AddIn",),)
+
+# Dump sys.path for debugging
+afile = open("/Volumes/Z77ExtremeDataSSD/dhocker/lo_sys_path.txt", "w")
+for s in sys.path:
+    afile.write(s+"\n")
+afile.close()
