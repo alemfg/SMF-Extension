@@ -104,9 +104,3 @@ g_ImplementationHelper = unohelper.ImplementationHelper()
 g_ImplementationHelper.addImplementation( \
     createInstance,"com.smf.ticker.getinfo.python.SmfImpl",
         ("com.sun.star.sheet.AddIn",),)
-
-# Dump sys.path for debugging
-afile = open("/Volumes/Z77ExtremeDataSSD/dhocker/lo_sys_path.txt", "w")
-for s in sys.path:
-    afile.write(s+"\n")
-afile.close()
