@@ -18,11 +18,23 @@
 #  break periodically and changes to the scraping code (parsing of the
 #  web page HTML) may be required.
 #
+#  Other possible historical quote sources
+#  Page scrape
+#  http://bigcharts.marketwatch.com/historical/default.asp?symb=msft&closeDate=5%2F31%2F2017&x=38&y=30
+#
+#  csv download (easy to parse)
+#  period1 = start date, period2 = end date all probably in unix format
+#  crumb is some sort of cookie value and the URL fails without it
+#  https://query1.finance.yahoo.com/v7/finance/download/VOO?period1=1496206800&period2=1496206800&interval=1d&events=history&crumb=BT3u4oroia8
+#  Works for MUTF's and indexes
+#
+#  Possible source
+#  http://www.eoddata.com/products/default.aspx
+#
 
 import urllib.request
 import urllib.parse
 import urllib.error
-import datetime
 from html.parser import HTMLParser
 
 
