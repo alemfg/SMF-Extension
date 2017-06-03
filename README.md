@@ -1,6 +1,10 @@
 SMF Extension for LibreOffice Calc
 ===
-The SMF extension allows you to create customized spreadsheets with stock market data directly from the web. Currently supported online sources include [Morningstar](http://morningstar.com) and [Yahoo Finance](http://finance.yahoo.com).
+The SMF extension allows you to create customized spreadsheets with stock market data directly from the web.
+Currently supported online sources include
+* [Morningstar](http://morningstar.com)
+* [Yahoo Finance](http://finance.yahoo.com)
+* [Google Historical Finance](http://www.google.com/finance/historical)
 
 ### Download   
 You can download the current version of the SMF Extension here [![][shield:release-latest]][GIT:release]
@@ -17,7 +21,7 @@ GETYAHOO(Ticker,Datacode)
 GETMORNINGKEY(Ticker,Datacode) 
 GETMORNINGFIN(Ticker,Datacode)
 GETMORNINGQFIN(Ticker,Datacode)
-GETYAHOOHIST(Ticker, Date, Datacode)
+GETHISTORICALQUOTE(Ticker, Date)
 ```  
 
 Quotes **must** be used when entering the ticker directly ex: ```GETYAHOO("AAPL",1)```, but are **not** needed when referencing another cell ex: ```GETYAHOO(A1,1)```.
@@ -26,13 +30,19 @@ In the latter case the data in A1 should be ```AAPL```, not ```"AAPL"```.
 
 **NOTE**: The full set of datacodes are demonstrated in the example .ods worksheets included with the release.
 
+Dates should be in ISO format YYYY-MM-DD.
+
 ###Support
 
-For general support please visit the [forums](http://forum.openoffice.org/en/forum/index.php). If you find a bug or wish to request a feature please file an issue at the [issue tracker](http://github.com/madsailor/SMF-Extension/issues).
+For general support please visit the [forums](http://forum.openoffice.org/en/forum/index.php).
+If you find a bug or wish to request a feature please file an issue at the [issue tracker](http://github.com/madsailor/SMF-Extension/issues).
 
 ### Contribute
 
-Help is always welcome with development.  If you would like to contribute you will need to fork the main repo, make your changes, and send a [pull request](http://github.com/madsailor/SMF-Extension/pulls) to have your changes moderated and merged back into the main repo. Details on that process can be found [here](https://help.github.com/articles/set-up-git/).  
+Help is always welcome with development.  If you would like to contribute you will need to fork the main repo,
+make your changes, and send a [pull request](http://github.com/madsailor/SMF-Extension/pulls) to have your
+changes moderated and merged back into the main repo. Details on that process can be found
+[here](https://help.github.com/articles/set-up-git/).
 
 
 ### License
@@ -49,7 +59,7 @@ The SMF Extension is released under the [![][shield:LGPL3]][License:3.0] which i
 * Villeroy - conversion from string to float to make the extension useful
 * karolus - optimization of keymapping code
 * Corey Goldberg - Inspiration with the Yahoo portion of the extension
-* Dave Hocker - Yahoo Finanacial Historical data support
+* Dave Hocker - Google Financial Historical data support
 
 [GIT:release]: http://github.com/madsailor/SMF-Extension/releases/latest
 [License:3.0]: http://www.gnu.org/licenses/lgpl.html
