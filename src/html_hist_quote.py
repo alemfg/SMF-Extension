@@ -36,6 +36,7 @@ import urllib.request
 import urllib.parse
 import urllib.error
 from html.parser import HTMLParser
+import datetime
 
 
 class HistQuoteHTMLParser(HTMLParser):
@@ -125,20 +126,16 @@ def fetch_data(self, ticker, tgtdate):
     :return: For numeric values returns a float. Otherwise, returns a string.
     """
 
-    # Resolve date
-    # This was an attempt to support LO date types. However,
-    # I could not figure out how dates worked and I could find no examples to shed light on the subject.
+    # Resolve date. It can be a LibreCalc date as a float or a string date
     if type(tgtdate) == float:
-        # LibreOffice date as a float
-        # base_date = datetime.date(1900, 1, 1)
-        # delta_date = datetime.timedelta(int(tgtdate))
-        # act_date = base_date + delta_date
-        # eff_date = act_date.strftime("%Y-%m-%d")
-        return "Date format not supported"
-    else:
+        eff_date = __float_to_date_str(tgtdate)
+    elif type(tgtdate) == str:
         # Assumed to be a string in ISO format.
-        # The IDL actually forces this to be a string.
         eff_date = tgtdate
+    else:
+        return "Unsuported date format type: {0} value: {1}".format(type(tgtdate), tgtdate)
+
+    # return "type: {0} value: {1}".format(type(tgtdate), eff_date)
 
     # Look for cache hit first...
     # Since historical data should be constant, only one web call is
@@ -160,6 +157,22 @@ def fetch_data(self, ticker, tgtdate):
     __insert_symbol(ticker, eff_date, q.close)
 
     return float(q.close)
+
+
+def __float_to_date_str(float_date):
+    """
+    Magic algorithm to convert float date
+    LibreOffice date as a float (actually the format used by Excel)
+    base_date = 1899-12-30 = the float value 0.0
+    see this reference: http://www.cpearson.com/excel/datetime.htm
+    :param float_date: ddddd.tttttt where d is days from 1899-12-30 and .tttttt is fraction of 24 hours
+    :return:
+    """
+    seconds = (int(float_date) - 25569) * 86400
+    d = datetime.datetime.utcfromtimestamp(seconds)
+    eff_date = d.strftime("%Y-%m-%d")
+    return eff_date
+
 
 #
 # This code was imported from the original yahoo_hist.py file
