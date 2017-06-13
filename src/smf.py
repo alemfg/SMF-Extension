@@ -62,8 +62,9 @@ class SmfImpl(unohelper.Base, XSmf ):
     def getYahoo( self, ticker, datacode ):
         try:
             x = float(yahoo.fetch_data(self, ticker, datacode))
-        except:
-            x = yahoo.fetch_data(self, ticker, datacode)
+        except Exception as ex:
+            # x = yahoo.fetch_data(self, ticker, datacode)
+            x = str(ex)
         return x
 
     def getMorningKey( self, ticker, datacode):

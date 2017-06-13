@@ -9,8 +9,6 @@ Currently supported online sources include
 ### Download   
 You can download the current version of the SMF Extension here [![][shield:release-latest]][GIT:release]
 
-The SMF extension can also be found on the [LibreOffice Extension Center](http://extensions.libreoffice.org/extension-center/smf-extension).
-
 **NOTE**: The extension itself is SMF.oxt.  The example .ods worksheets demonstrate how to use the extension.
 
 ### Usage
@@ -32,7 +30,13 @@ In the latter case the data in A1 should be ```AAPL```, not ```"AAPL"```.
 
 Dates should be in ISO format YYYY-MM-DD.
 
-###Support
+### Notes
+
+Somewhere around 5/15/2017 Yahoo terminated its historical stock data service. As a result the Yahoo historical data
+function was removed and partially replaced by a Google based function that can return the closing price
+for a given stock on a given date.
+
+### Support
 
 For general support please visit the [forums](http://forum.openoffice.org/en/forum/index.php).
 If you find a bug or wish to request a feature please file an issue at the [issue tracker](http://github.com/madsailor/SMF-Extension/issues).
