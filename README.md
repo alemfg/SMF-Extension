@@ -7,7 +7,7 @@ Currently supported online sources include
 * [Google Historical Finance](http://www.google.com/finance/historical)
 
 ### Download   
-You can download the current version of the SMF Extension here [![][shield:release-latest]][GIT:release]
+You can download the latest version of the SMF Extension [here](https://github.com/dhocker/SMF-Extension/releases/latest).
 
 **NOTE**: The extension itself is SMF.oxt.  The example .ods worksheets demonstrate how to use the extension.
 
