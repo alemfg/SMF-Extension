@@ -2,6 +2,7 @@ import urllib.request
 import urllib.parse
 import urllib.error
 import datetime
+import json
 from lxml import html
 
 class Quote:
@@ -78,6 +79,29 @@ class Quote:
         #print (html)
         return html
 
+    @staticmethod
+    def get_google_stock_info(ticker):
+        """
+        Get a current stock quote through Google.
+        Seems to work sporadically, acts like it is being throttled.
+        :param ticker:
+        :return:
+        """
+        url_string = "https://www.google.com/finance/info?q={0}".format(ticker)
+        print (url_string)
+        #request = urllib.request.Request(url_string, headers={"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:55.0) Gecko/20100101 Firefox/55.0"})
+        json_result = []
+        try:
+            response = urllib.request.urlopen(url_string).readlines()
+            json_data = ""
+            for line in response:
+                json_data += str(line, "utf-8")
+            json_result = json.loads(json_data[3:])
+        except urllib.error.HTTPError as ex:
+            print (str(ex))
+            return str(ex)
+        return json_result
+
 #Quote.get_quote("VOO", "2017-05-30")
 #Quote.get_quote("VPU", "2017-05-30")
 #Quote.get_quote("VDC", "2017-05-30")
@@ -90,8 +114,9 @@ class Quote:
 #get_quote("USSBX", "2017-05-30")
 
 #Quote.scrape_quote("usibx", "2017-05-30")
-Quote.lxml_scrape_quote("usibx", "2017-05-30")
-
+#Quote.lxml_scrape_quote("usibx", "2017-05-30")
+j = Quote.get_google_stock_info("bxmx")
+print (j)
 
 """
 USIBX

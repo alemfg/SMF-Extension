@@ -1,0 +1,160 @@
+Example results captured from Google Finance
+
+https://www.google.com/finance/info?q=aapl:nasdaq,ATULAUTO
+
+// [ { "id": "22144" ,"t" : "AAPL" ,"e" : "NASDAQ" ,"l" : "145.16" ,"l_fix" : "145.16" ,"l_cur" : "145.16" ,"s": "2" ,"ltt":"4:00PM EDT" ,"lt" : "Jun 14, 4:00PM EDT" ,"lt_dts" : "2017-06-14T16:00:07Z" ,"c" : "-1.43" ,"c_fix" : "-1.43" ,"cp" : "-0.98" ,"cp_fix" : "-0.98" ,"ccol" : "chr" ,"pcls_fix" : "146.59" ,"el": "145.26" ,"el_fix": "145.26" ,"el_cur": "145.26" ,"elt" : "Jun 14, 4:10PM EDT" ,"ec" : "+0.10" ,"ec_fix" : "0.10" ,"ecp" : "0.07" ,"ecp_fix" : "0.07" ,"eccol" : "chg" ,"div" : "0.63" ,"yld" : "1.74" } ]
+
+cp -0.98
+div 0.63
+c -1.43
+t AAPL
+c_fix -1.43
+elt Jun 14, 4:10PM EDT
+el_fix 145.26
+ltt 4:00PM EDT
+lt Jun 14, 4:00PM EDT
+ecp 0.07
+pcls_fix 146.59
+l_fix 145.16
+ecp_fix 0.07
+l_cur 145.16
+cp_fix -0.98
+eccol chg
+el_cur 145.26
+ec +0.10
+lt_dts 2017-06-14T16:00:07Z
+id 22144
+el 145.26
+ccol chr
+e NASDAQ
+yld 1.74
+l 145.16
+ec_fix 0.10
+s 2
+
+This code will load the response as JSON (skipping the starting "// ")
+j = json.loads(r[3:])
+where r is the response from the Google call.
+
+
+WSJ captured ajax queries
+
+http://quotes.wsj.com/ajax/historicalpricesetf/4/MSFT?MOD_VIEW=page&ticker=MSFT&country=US&exchange=XNAS&instrumentType=STOCK&num_rows=2&range_days=2&startDate=06%2F15%2F2017&endDate=06%2F16%2F2017
+
+exhange
+    XNYS = nyse
+    XNAS = nasdaq
+    ARCX = mutf
+instrumentType
+    STOCK
+    FUND (seems to work for ETF and MUTF)
+
+<div class="rr_historical module fullpage" id="cr_historical_page" data-ticker="MSFT" data-country="US" data-exchange="XNAS" data-type="STOCK" data-page="">
+	<h1></h1>
+	<div class="historical_topnav">
+		<div class="dateRange_nav">
+			<span><input type="text" value="06/15/2017" class="datePicker" id="selectDateFrom" /></span>
+			<span>to</span>
+			<span><input type="text" value="06/16/2017" class="datePicker" id="selectDateTo" /></span>
+			<span><input type="button" value="go" id="datPickerButton"/></span>
+		</div>
+		<div class="nav_right">
+			<a href="#" class="dl_button" id="dl_spreadsheet">Download a Spreadsheet</a>
+		</div>
+	</div>
+		<div class="scrollHeader">
+			<table class="cr_dataTable">
+				<thead>
+					<tr>
+						<th>DATE</th>
+						<th>OPEN</th>
+						<th>HIGH</th>
+						<th>LOW</th>
+						<th>CLOSE</th>
+							<th>VOLUME</th>
+					</tr>
+				</thead>
+			</table>
+		</div>
+		<div id="historical_data_table">
+			<div class="scrollBox">
+				<table class="cr_dataTable">
+					<tbody>
+					<tr>
+						<td>06/15/17</td>
+					  	<td>69.2700</td>
+					  	<td>70.2100</td>
+					  	<td>68.8000</td>
+					  	<td>69.9000</td>
+							<td>26.07 M</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+
+		</div>
+
+http://quotes.wsj.com/ajax/historicalpricesfund/4/USIBX?MOD_VIEW=page&ticker=USIBX&country=US&exchange=XNAS&instrumentType=FUND&num_rows=1&range_days=1&startDate=05/30/2017&endDate=05/31/2017
+
+<div class="rr_historical module fullpage" id="cr_historical_page" data-ticker="USIBX" data-country="US" data-exchange="XNAS" data-type="FUND" data-page="">
+	<h1></h1>
+	<div class="historical_topnav">
+		<div class="dateRange_nav">
+			<span><input type="text" value="05/30/2017" class="datePicker" id="selectDateFrom" /></span>
+			<span>to</span>
+			<span><input type="text" value="05/31/2017" class="datePicker" id="selectDateTo" /></span>
+			<span><input type="button" value="go" id="datPickerButton"/></span>
+		</div>
+		<div class="nav_right">
+			<a href="#" class="dl_button" id="dl_spreadsheet">Download a Spreadsheet</a>
+		</div>
+	</div>
+		<div class="scrollHeader">
+			<table class="cr_dataTable">
+				<thead>
+					<tr>
+						<th>DATE</th>
+						<th>OPEN</th>
+						<th>HIGH</th>
+						<th>LOW</th>
+						<th>CLOSE</th>
+					</tr>
+				</thead>
+			</table>
+		</div>
+		<div id="historical_data_table">
+			<div class="scrollBox">
+				<table class="cr_dataTable">
+					<tbody>
+					<tr>
+						<td>05/31/17</td>
+					  	<td>10.68</td>
+					  	<td>10.68</td>
+					  	<td>10.68</td>
+					  	<td>10.68</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+
+		</div>
+
+macOS LibreOffice python
+This appears to be the version of python that is installed under LibreOffice.
+
+/Applications/LibreOffice.app/Contents/Frameworks/LibreOfficePython.framework/Resources/Python.app/Contents/MacOS $ ./LibreOfficePython
+Python 3.5.0 (default, Apr 25 2017, 17:09:39)
+[GCC 4.2.1 Compatible Apple LLVM 6.0 (clang-600.0.51)] on darwin
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import sys
+>>> print (sys.path)
+[
+'',
+'/Applications/LibreOffice.app/Contents/Frameworks/LibreOfficePython.framework/Versions/3.5/lib/python35.zip',
+'/Applications/LibreOffice.app/Contents/Frameworks/LibreOfficePython.framework/Versions/3.5/lib/python3.5',
+'/Applications/LibreOffice.app/Contents/Frameworks/LibreOfficePython.framework/Versions/3.5/lib/python3.5/plat-darwin',
+'/Applications/LibreOffice.app/Contents/Frameworks/LibreOfficePython.framework/Versions/3.5/lib/python3.5/lib-dynload',
+'/Applications/LibreOffice.app/Contents/Frameworks/LibreOfficePython.framework/Versions/3.5/lib/python3.5/site-packages'
+]

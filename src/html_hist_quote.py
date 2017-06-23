@@ -28,8 +28,85 @@
 #  https://query1.finance.yahoo.com/v7/finance/download/VOO?period1=1496206800&period2=1496206800&interval=1d&events=history&crumb=BT3u4oroia8
 #  Works for MUTF's and indexes
 #
-#  Possible source
+#  Research for possible stock data sources
+#
+#  A list...many are deprecated or discontinued.
+#  http://www.programmableweb.com/news/96-stocks-apis-bloomberg-nasdaq-and-etrade/2013/05/22
+#
 #  http://www.eoddata.com/products/default.aspx
+#
+#############################################
+#  https://www.google.com/finance/info?q=aapl
+#  Possible limit on use
+#  Code example: https://dzone.com/articles/python-stock-quotes-google
+#  Returns a JSON-like result
+#  The key/value pairs use cryptic keys that require some humanizing for consumption.
+#  Some of the keys
+#   t	Ticker
+#   e	Exchange
+#   l	Last Price
+#   ltt	Last Trade Time
+#   l	Price
+#   lt	Last Trade Time Formatted
+#   lt_dts	Last Trade Date/Time
+#   c	Change
+#   cp	Change Percentage
+#   el	After Hours Last Price
+#   elt	After Hours Last Trade Time Formatted
+#   div	Dividend
+#   yld	Dividend Yield
+#  And, another explanation of keys
+#     id: ID,
+#     t: StockSymbol,
+#     e: Index,
+#     l: LastTradePrice,
+#     l_cur: LastTradeWithCurrency,
+#     ltt: LastTradeTime,
+#     lt_dts: LastTradeDateTime,
+#     lt: LastTradeDateTimeLong,
+#     div: Dividend,
+#     yld: Yield,
+#     s: LastTradeSize,
+#     c: Change,
+#     c: ChangePercent,
+#     el: ExtHrsLastTradePrice,
+#     el_cur: ExtHrsLastTradeWithCurrency,
+#     elt: ExtHrsLastTradeDateTimeLong,
+#     ec: ExtHrsChange,
+#     ecp: ExtHrsChangePercent,
+#     pcls_fix: PreviousClosePrice
+#
+##############################
+#  http://www.alphavantage.co/ (appears to be located in Malaysia)
+#  Documented APIs that return JSON.
+#  Requires a "free" API key. Unclear what "free" means.
+#  https://github.com/RomelTorres/alpha_vantage
+#   A Python front end to Alpha Vantage. Looks like a good example for usage.
+#
+#######################
+#  https://intrinio.com
+#  https://intrinio.com/signup
+#   Provides a number of financial data APIs. Some are free and have daily usage limits.
+#   Most APIs are fee based. However, basic US stock data (e.g. price) can be obtained
+#   under limit, for free.
+#  http://intrin.io/2dIXgnW
+#   How to use API
+#  http://intrin.io/2dQrRB0
+#   Tutorial with code
+#  Example with authorization
+#  // With shell, you must include the username and
+#  // password header
+#  curl "https://api.intrinio.com/data_point?identifier=AAPL&item=close_price"
+#    -u "API_USERNAME:API_PASSWORD"
+#
+#  // With the '-u' option in curl, it will automatically
+#  // convert the username and password into the
+#  // appropriate header. If you do not use this
+#  // option or it is not available to you, you must
+#  // include a header with the basic auth credentials
+#  // included as base64 encoded.
+#  curl "https://api.intrinio.com/data_point?identifier=AAPL&item=close_price"
+#    -H "Authorization: Basic $BASE64_ENCODED(USERNAME:PASSWORD)"
 #
 
 import urllib.request
