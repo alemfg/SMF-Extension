@@ -16,10 +16,12 @@ cur_dir = os.getcwd()
 
 # A unique ID for the extension.
 addin_id = "com.smf.ticker.getinfo"
-addin_version = "0.8.7"
-addin_displayname = "Forked Version of Stock Market Function Extension."
+addin_version = "0.9.3"
+addin_displayname = "Stock Market Function Extension (Forked Version)"
 addin_publisher_link = "https://github.com/dhocker/SMF-Extension"
 addin_publisher_name = "TheAgency"
+
+print ("Generating extension files for version", addin_version)
 
 # description.xml
 #
@@ -30,27 +32,29 @@ desc_xml = open(cur_dir + '/SMF/description.xml', 'w')
 desc_xml.write('<?xml version="1.0" encoding="UTF-8"?>\n')
 desc_xml.write('<description xmlns="http://openoffice.org/extensions/description/2006" \n')
 desc_xml.write('xmlns:d="http://openoffice.org/extensions/description/2006" \n')
+desc_xml.write('xmlns:l="http://libreoffice.org/extensions/description/2011" \n')
 desc_xml.write('xmlns:xlink="http://www.w3.org/1999/xlink"> \n' + '\n')
 desc_xml.write('<dependencies> \n')
-desc_xml.write('    <OpenOffice.org-minimal-version value="2.4" d:name="OpenOffice.org 2.4"/> \n')
+desc_xml.write('    <l:LibreOffice-minimal-version value="5.0" d:name="LibreOffice 5.0" /> \n')
 desc_xml.write('</dependencies> \n')
 desc_xml.write('\n')
 desc_xml.write('<identifier value="' + addin_id + '" /> \n')
 desc_xml.write('<version value="' + addin_version + '" />\n')   
 desc_xml.write('<display-name><name lang="en">' + addin_displayname + '</name></display-name>\n')
 desc_xml.write('<publisher><name xlink:href="' + addin_publisher_link + '" lang="en">' + addin_publisher_name + '</name></publisher>\n')
+desc_xml.write('<extension-description><src xlink:href="description-en-US.txt" lang="en" /></extension-description>')
 desc_xml.write('\n')
 desc_xml.write('</description> \n')
 
-desc_xml.close
+desc_xml.close()
 
 def add_manifest_entry(xml_file, file_type, file_name):
     xml_file.write('<manifest:file-entry manifest:media-type="application/vnd.sun.star.' + file_type + '" \n')
     xml_file.write('    manifest:full-path="' + file_name + '"/> \n')
 
 # manifest.xml
-#
 # List of files in package and their types.
+#
 
 manifest_xml = open(cur_dir + '/SMF/META-INF/manifest.xml', 'w')
 
@@ -60,7 +64,7 @@ add_manifest_entry(manifest_xml, 'configuration-data', 'SMF.xcu')
 add_manifest_entry(manifest_xml, 'uno-component;type=Python', 'smf.py')
 manifest_xml.write('</manifest:manifest> \n')
 
-manifest_xml.close
+manifest_xml.close()
 
 # SMF.xcu
 #
@@ -117,7 +121,11 @@ define_function(smf_xml, \
     [('a', 'The ticker symbol.'), ('b', 'The date.'), ('c', 'The data name or code.')])
 
 define_function(smf_xml, \
-    'getHistoricalQuote', 'Fetches Historical Closing Quote', \
+    'getHistoricalQuote', 'Fetches Historical Closing Quote from Google', \
+    [('a', 'The ticker symbol.'), ('b', 'The date.')])
+
+define_function(smf_xml, \
+    'getIntrinioQuote', 'Fetches Historical Closing Quote from Intrinio', \
     [('a', 'The ticker symbol.'), ('b', 'The date.')])
 
 smf_xml.write('</node>\n')
@@ -125,6 +133,6 @@ smf_xml.write('</node>\n')
 smf_xml.write('</node>\n')
 smf_xml.write('</oor:component-data>\n')
 
-smf_xml.close
+smf_xml.close()
 
 # Done

@@ -1,6 +1,6 @@
 #  html_hist_quote.py - Retrieve historical data from Yahoo Finance for the SMF Extension.
 #
-#  Copyright 2017 by Dave Hocker (AtHomeX10@gmail.com)
+#  Copyright 2017 by Dave Hocker as TheAgency (AtHomeX10@gmail.com)
 #
 #  license: GNU LGPL
 #
@@ -18,102 +18,93 @@
 #  break periodically and changes to the scraping code (parsing of the
 #  web page HTML) may be required.
 #
-#  Other possible historical quote sources
-#  Page scrape
-#  http://bigcharts.marketwatch.com/historical/default.asp?symb=msft&closeDate=5%2F31%2F2017&x=38&y=30
-#
-#  csv download (easy to parse)
-#  period1 = start date, period2 = end date all probably in unix format
-#  crumb is some sort of cookie value and the URL fails without it
-#  https://query1.finance.yahoo.com/v7/finance/download/VOO?period1=1496206800&period2=1496206800&interval=1d&events=history&crumb=BT3u4oroia8
-#  Works for MUTF's and indexes
+#############################################
 #
 #  Research for possible stock data sources
 #
-#  A list...many are deprecated or discontinued.
 #  http://www.programmableweb.com/news/96-stocks-apis-bloomberg-nasdaq-and-etrade/2013/05/22
 #
 #  http://www.eoddata.com/products/default.aspx
 #
 #############################################
-#  https://www.google.com/finance/info?q=aapl
-#  Possible limit on use
-#  Code example: https://dzone.com/articles/python-stock-quotes-google
-#  Returns a JSON-like result
-#  The key/value pairs use cryptic keys that require some humanizing for consumption.
-#  Some of the keys
-#   t	Ticker
-#   e	Exchange
-#   l	Last Price
-#   ltt	Last Trade Time
-#   l	Price
-#   lt	Last Trade Time Formatted
-#   lt_dts	Last Trade Date/Time
-#   c	Change
-#   cp	Change Percentage
-#   el	After Hours Last Price
-#   elt	After Hours Last Trade Time Formatted
-#   div	Dividend
-#   yld	Dividend Yield
-#  And, another explanation of keys
-#     id: ID,
-#     t: StockSymbol,
-#     e: Index,
-#     l: LastTradePrice,
-#     l_cur: LastTradeWithCurrency,
-#     ltt: LastTradeTime,
-#     lt_dts: LastTradeDateTime,
-#     lt: LastTradeDateTimeLong,
-#     div: Dividend,
-#     yld: Yield,
-#     s: LastTradeSize,
-#     c: Change,
-#     c: ChangePercent,
-#     el: ExtHrsLastTradePrice,
-#     el_cur: ExtHrsLastTradeWithCurrency,
-#     elt: ExtHrsLastTradeDateTimeLong,
-#     ec: ExtHrsChange,
-#     ecp: ExtHrsChangePercent,
-#     pcls_fix: PreviousClosePrice
+#
+#  http://www.google.com/finance/historical?q=ticker
+#  Implemented
 #
 ##############################
-#  http://www.alphavantage.co/ (appears to be located in Malaysia)
-#  Documented APIs that return JSON.
-#  Requires a "free" API key. Unclear what "free" means.
-#  https://github.com/RomelTorres/alpha_vantage
-#   A Python front end to Alpha Vantage. Looks like a good example for usage.
 #
-#######################
 #  https://intrinio.com
-#  https://intrinio.com/signup
-#   Provides a number of financial data APIs. Some are free and have daily usage limits.
-#   Most APIs are fee based. However, basic US stock data (e.g. price) can be obtained
-#   under limit, for free.
-#  http://intrin.io/2dIXgnW
-#   How to use API
-#  http://intrin.io/2dQrRB0
-#   Tutorial with code
-#  Example with authorization
-#  // With shell, you must include the username and
-#  // password header
-#  curl "https://api.intrinio.com/data_point?identifier=AAPL&item=close_price"
-#    -u "API_USERNAME:API_PASSWORD"
+#  Implemented
+#  Requires sign up. Currently, historical price quotes are free with a limit of 500 calls per day.
 #
-#  // With the '-u' option in curl, it will automatically
-#  // convert the username and password into the
-#  // appropriate header. If you do not use this
-#  // option or it is not available to you, you must
-#  // include a header with the basic auth credentials
-#  // included as base64 encoded.
-#  curl "https://api.intrinio.com/data_point?identifier=AAPL&item=close_price"
-#    -H "Authorization: Basic $BASE64_ENCODED(USERNAME:PASSWORD)"
-#
+##############################
 
 import urllib.request
 import urllib.parse
 import urllib.error
 from html.parser import HTMLParser
+import ssl
 import datetime
+import json
+import os
+import app_logger
+import sys
+
+# Logger init
+app_logger.EnableLogging()
+logger = app_logger.getAppLogger()
+logger.debug("Python system path: %s", sys.path)
+
+
+class QConfiguration:
+    """
+    Encapsulates Intrinio configuration including credentials.
+    """
+    auth_user = ""
+    auth_passwd = ""
+    cacerts = ""
+    # Base URL for Intrinio services
+    base_url = "https://api.intrinio.com"
+    macOS = False
+
+    @classmethod
+    def load(cls):
+        """
+        Load credentials from configuration file. The location of the intrinio.conf
+        file is OS dependent. The permissions of the intrinio.conf file should allow
+        access ONLY by the user.
+        :return:
+        """
+        file_name = "intrinio.conf"
+        file_path = ""
+        if os.name == "posix":
+            # Linux or OS X
+            file_path = "{0}/libreoffice/intrinio/".format(os.environ["HOME"])
+            if os.uname()[0] == "Darwin":
+                QConfiguration.macOS = True
+        elif os.name == "nt":
+            # Windows
+            file_path = "{0}\\libreoffice\\intrinio\\".format(os.environ["HOMEPATH"])
+        full_file_path = file_path + file_name
+
+        # Read credentials
+        try:
+            cf = open(full_file_path, "r")
+            cfj = json.loads(cf.read())
+            cls.auth_user = cfj["user"]
+            cls.auth_passwd = cfj["password"]
+            # certifi is required for macOS
+            if "certifi" in cfj:
+                cls.cacerts = cfj["certifi"]
+            cf.close()
+        except FileNotFoundError as ex:
+            logger.debug("%s was not found", full_file_path)
+        except Exception as ex:
+            logger.debug("An exception occurred while attempting to load intrinio.conf")
+            logger.debug(str(ex))
+
+# Initialize Intrinio configuration
+QConfiguration.load()
 
 
 class HistQuoteHTMLParser(HTMLParser):
@@ -160,7 +151,49 @@ class HistQuoteHTMLParser(HTMLParser):
             self.col += 1
             self.td_on = False
 
-class Quote:
+class IntrinioBase:
+
+    @staticmethod
+    def setup_authorization(url_string):
+        passman = urllib.request.HTTPPasswordMgrWithDefaultRealm()
+        passman.add_password(None, url_string, QConfiguration.auth_user, QConfiguration.auth_passwd)
+        authhandler = urllib.request.HTTPBasicAuthHandler(passman)
+
+        if QConfiguration.macOS:
+            # The LO version of python does not have any cacerts. certifi as an alternate.
+            # This works on macOS 10.12.5 Sierra. Why is unclear. It literally took days to
+            # find this as a working solution.
+            # See: https://github.com/certifi/python-certifi and https://pypi.python.org/pypi/certifi
+            ssl_ctx = ssl.create_default_context(cafile=QConfiguration.cacerts)
+            httpshandler = urllib.request.HTTPSHandler(context=ssl_ctx)
+            opener = urllib.request.build_opener(httpshandler, authhandler)
+        else:
+            opener = urllib.request.build_opener(authhandler)
+
+        urllib.request.install_opener(opener)
+
+
+    @staticmethod
+    def exec_request(url_string):
+        """
+
+        :param url_string:
+        :return:
+        """
+        print(url_string)
+        Quote.setup_authorization(url_string)
+        try:
+            logger.debug("Calling Intrinio API: %s", url_string)
+            res = urllib.request.urlopen(url_string).read()
+            res = str(res, "utf-8")
+        except urllib.error.HTTPError as ex:
+            logger.debug("Exception attempting to call Intrinio API")
+            logger.debug(ex.msg)
+            raise ex
+
+        return json.loads(res)
+
+class Quote(IntrinioBase):
     """
     A historical quote for a given ticker symbol
     """
@@ -193,6 +226,22 @@ class Quote:
         print (parser.quote_data)
 
         return Quote(ticker, start_date, float(parser.quote_data["close"].replace(",", "")))
+
+    @staticmethod
+    def get_intrinio_quote(ticker, start_date):
+        """
+
+        :param ticker:
+        :param instrument_type:
+        :param start_date:
+        :return:
+        """
+
+        template_url = "{0}/historical_data?identifier={1}&item=close_price&start_date={2}&end_date={3}"
+        url_string = template_url.format(QConfiguration.base_url, ticker, start_date, start_date)
+        res = Quote.exec_request(url_string)
+        # Extract closing price from json result
+        return Quote(ticker, start_date, float(res["data"][0]["value"]))
 
 
 def fetch_data(self, ticker, tgtdate):
@@ -236,6 +285,46 @@ def fetch_data(self, ticker, tgtdate):
     return float(q.close)
 
 
+def intrinio_fetch_data(self, ticker, tgtdate):
+    """
+    Retrieve historical stock quote from Google web page
+    :param ticker: string - stock ticker symbol (e.g XOM)
+    :param tgtdate: string or float (libreoffice date) - for date of interest
+    :return: For numeric values returns a float. Otherwise, returns a string.
+    """
+
+    # Resolve date. It can be a LibreCalc date as a float or a string date
+    if type(tgtdate) == float:
+        eff_date = __float_to_date_str(tgtdate)
+    elif type(tgtdate) == str:
+        # Assumed to be a string in ISO format.
+        eff_date = tgtdate
+    else:
+        logger.debug("Unsuported date format type: {0} value: {1}".format(type(tgtdate), tgtdate))
+        return "Unsuported date format type: {0} value: {1}".format(type(tgtdate), tgtdate)
+
+    # Look for cache hit first...
+    # Since historical data should be constant, only one web call is
+    # needed for a ticker/date combination.
+    cr = __lookup_symbol_by_date(ticker, eff_date)
+    if cr:
+        logger.debug("Cache hit for %s %s", ticker, eff_date)
+        cv = cr["Close"]
+        try:
+            v = float(cv)
+        except:
+            v = str(cv)
+        return v
+
+    # Use Intrinio to get historical data
+    q = Quote.get_intrinio_quote(ticker, eff_date)
+
+    # Cache the quote
+    __insert_symbol(ticker, eff_date, q.close)
+
+    return float(q.close)
+
+
 def __float_to_date_str(float_date):
     """
     Magic algorithm to convert float date
@@ -252,7 +341,8 @@ def __float_to_date_str(float_date):
 
 
 #
-# This code was imported from the original yahoo_hist.py file
+# This code was imported from the original yahoo_hist.py file. It implements a caching
+# systems using sqlite3 as the backing store.
 #
 
 import sqlite3

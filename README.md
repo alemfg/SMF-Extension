@@ -1,10 +1,11 @@
-SMF Extension for LibreOffice Calc
-===
+SMF Extension for LibreOffice Calc (Forked Version)
+===================================================
 The SMF extension allows you to create customized spreadsheets with stock market data directly from the web.
 Currently supported online sources include
 * [Morningstar](http://morningstar.com)
 * [Yahoo Finance](http://finance.yahoo.com)
 * [Google Historical Finance](http://www.google.com/finance/historical)
+* [Intrinio](https://www.intrinio.com)
 
 ### Download   
 You can download the latest version of the SMF Extension [here](https://github.com/dhocker/SMF-Extension/releases/latest).
@@ -13,13 +14,14 @@ You can download the latest version of the SMF Extension [here](https://github.c
 
 ### Usage
 
-The SMF Extension adds four new functions to Calc:  
+The SMF Extension adds several new functions to Calc:
 ```
 GETYAHOO(Ticker,Datacode) 
 GETMORNINGKEY(Ticker,Datacode) 
 GETMORNINGFIN(Ticker,Datacode)
 GETMORNINGQFIN(Ticker,Datacode)
 GETHISTORICALQUOTE(Ticker, Date)
+GETINTRINIOQUOTE(Ticker, Date)
 ```  
 
 Quotes **must** be used when entering the ticker directly ex: ```GETYAHOO("AAPL",1)```, but are **not** needed when referencing another cell ex: ```GETYAHOO(A1,1)```.
@@ -33,8 +35,16 @@ Dates should be in ISO format YYYY-MM-DD.
 ### Notes
 
 Somewhere around 5/15/2017 Yahoo terminated its historical stock data service. As a result the Yahoo historical data
-function was removed and partially replaced by a Google based function that can return the closing price
-for a given stock on a given date.
+function was removed and partially replaced by two new functions.
+
+* A Google based function that can return the closing price for a given stock on a given date.
+* An [Intrinio](https://www.intrinio.com) based function that can return the closing price for a given stock on a given date.
+
+Intrinio is a relatively new service that can provide a vast amount of stock
+market related data. Some data is free (like the API used to get historical stock quotes) but
+has limitations on quantity. For example, with a free account you can request 500 data points
+per day. While the free account has limitations, the service is reliable.
+Refer to the web site for details.
 
 ### Support
 
@@ -63,9 +73,8 @@ The SMF Extension is released under the [![][shield:LGPL3]][License:3.0] which i
 * Villeroy - conversion from string to float to make the extension useful
 * karolus - optimization of keymapping code
 * Corey Goldberg - Inspiration with the Yahoo portion of the extension
-* Dave Hocker - Google Financial Historical data support
+* Dave Hocker - Google Financial Historical data support, Intrinio historical data support.
 
-[GIT:release]: http://github.com/madsailor/SMF-Extension/releases/latest
 [License:3.0]: http://www.gnu.org/licenses/lgpl.html
 [shield:release-latest]: http://img.shields.io/github/release/madsailor/SMF-Extension.svg
 [shield:LGPL3]: http://img.shields.io/badge/license-LGPL%20v.3-blue.svg

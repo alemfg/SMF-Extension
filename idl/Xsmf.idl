@@ -16,6 +16,8 @@ module com { module smf { module ticker { module getinfo {
       any getYahooHist( [in] string a, [in] string b, [in] string c );
       // ticker, date
       any getHistoricalQuote( [in] string a, [in] any b );
+      // ticker, date
+      any getIntrinioQuote( [in] string a, [in] any b );
     };
 
 }; }; }; };

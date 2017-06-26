@@ -7,7 +7,7 @@ export PATH=$PATH:/usr/lib/ure/bin/
 #export PATH=$PATH:/usr/lib/libreoffice/sdk/bin/
 # They were here...
 #export PATH=$PATH:/usr/local/share/libreoffice/bin
-export PATH=$PATH:/Users/dhocker/LibreOffice5.2_SDK/bin
+export PATH=$PATH:/Users/dhocker/LibreOffice5.3_SDK/bin
 # This addition was required to make the script work with
 # SDK 5.2
 export DYLD_LIBRARY_PATH=$OO_SDK_URE_LIB_DIR
@@ -28,6 +28,7 @@ cp -f "${PWD}"/src/yahoo.py "${PWD}"/SMF/
 cp -f "${PWD}"/src/advfn.py "${PWD}"/SMF/
 cp -f "${PWD}"/src/yahoo_hist.py "${PWD}"/SMF/
 cp -f "${PWD}"/src/html_hist_quote.py "${PWD}"/SMF/
+cp -f "${PWD}"/src/app_logger.py "${PWD}"/SMF/
 cp -f "${PWD}"/src/description-en-US.txt "${PWD}"/SMF/
 python "${PWD}"/src/generate_metainfo.py
 

@@ -28,6 +28,7 @@ cmd_folder = os.path.realpath(os.path.abspath
                                              ( inspect.currentframe() ))[0]))
 if cmd_folder not in sys.path:
     sys.path.insert(0, cmd_folder)
+
 import yahoo
 import morningstar
 import advfn
@@ -55,6 +56,12 @@ class SmfImpl(unohelper.Base, XSmf ):
         self.total_advfn_data = []
         self.yahoo_hist_cache = {}
     #Following functions are called and mapped by LO through the Xsmf.rdb file.
+    def getIntrinioQuote( self, ticker, tgtdate ):
+        try:
+            x = html_hist_quote.intrinio_fetch_data(self, ticker, tgtdate)
+        except Exception as ex:
+            x = str(ex)
+        return x
     def getHistoricalQuote( self, ticker, tgtdate ):
         try:
             x = html_hist_quote.fetch_data(self, ticker, tgtdate)
