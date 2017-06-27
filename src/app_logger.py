@@ -39,7 +39,7 @@ def EnableLogging():
         file_path = "{0}/libreoffice/intrinio/".format(os.environ["HOME"])
     elif os.name == "nt":
         # Windows
-        file_path = "{0}\\libreoffice\\intrinio\\".format(os.environ["HOMEPATH"])
+        file_path = "{0}\\libreoffice\\intrinio\\".format(os.environ["LOCALAPPDATA"])
     logfile = file_path + "smf-extension.log"
 
     fh = logging.handlers.TimedRotatingFileHandler(logfile, when='midnight', backupCount=3)

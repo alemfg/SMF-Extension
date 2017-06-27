@@ -84,7 +84,7 @@ class QConfiguration:
                 QConfiguration.macOS = True
         elif os.name == "nt":
             # Windows
-            file_path = "{0}\\libreoffice\\intrinio\\".format(os.environ["HOMEPATH"])
+            file_path = "{0}\\libreoffice\\intrinio\\".format(os.environ["LOCALAPPDATA"])
         full_file_path = file_path + file_name
 
         # Read credentials
@@ -315,6 +315,10 @@ def intrinio_fetch_data(self, ticker, tgtdate):
         except:
             v = str(cv)
         return v
+
+    # We need intrinio.conf to use Intrinio
+    if not QConfiguration.auth_user:
+        return "intrinio.conf is missing or in error"
 
     # Use Intrinio to get historical data
     q = Quote.get_intrinio_quote(ticker, eff_date)

@@ -12,6 +12,137 @@ You can download the latest version of the SMF Extension [here](https://github.c
 
 **NOTE**: The extension itself is SMF.oxt.  The example .ods worksheets demonstrate how to use the extension.
 
+### Before Installing
+
+LibreOffice runs on multiple operating systems. For unknown reasons, the content of a LibreOffice install is
+different depending on the operating system. In particular, LibreOffice ships with an embedded version of
+Python and the configuration of the embedded version varies significantly.
+
+#### Windows
+
+The forked SMF Extension uses Sqlite3 to cache historical price quotes. Unfortunately, the Windows version
+of LibreOffice does not come with Sqlite3. If you want to use the forked SMF Extension on Windows, you will
+need to install Python 3 and set up PYTHONPATH according to your installation. See the prerequisite installation
+instructions below.
+
+#### macOS
+
+Some of the web services used by the forked SMF Extension require secure connections through HTTPS.
+The urllib package in the embedded version of Python does not recognize or use the CA certificates
+installed under macOS. To compensate for this issue you will need to install the
+[certifi package](https://github.com/certifi/python-certifi) and create an intrinio.conf file.
+Refer to the prerequisite installation instructions below.
+
+#### Linux/Ubuntu
+
+To be determined.
+
+#### Intrinio Service
+
+If you want to use the Intrinio historical quote function you will need to obtain a free [Intrinio](https://www.intrinio.com)
+account. Once you have signed up for an account you can get the [username and password keys](https://intrinio.com/account)
+that are required to access the Intrinio service. These keys need to go into the intrinio.conf file as described
+in the prerequisite installation instructions below.
+
+### Installation
+
+There are two major steps for installation.
+
+1. Install/setup prerequisites.
+1. Install the extension under LibreOffice
+
+#### Install/Setup Prerequisites
+
+##### Windows
+
+If you want to run the SMF Extension under Windows, it is recomended that
+you install the latest version of [Python 3](https://www.python.org/downloads/).
+Be sure to note where you install it. For simplicity, you might consider
+installing to C:\python36 or C:\python3.
+
+After you install Python 3, go to the Control Panel and set up the
+PYTHONPATH variable. Open the menu and type **environment variables**.
+This should lead you to the System Properties dialog box. Click on the
+**Environment Variables** button.
+
+Create a new **user** variable named PYTHONPATH. Set the value to the following.
+```
+c:\python33;c:\python33\Lib;c:\python33\Lib\site-packages;c:\python33\Lib\sqlite3;c:\python33\DLLs
+```
+This assumes you installed Python 3 to C:\python33. If you installed to a
+different directory, adjust accordingly.
+
+##### macOS
+
+If you want to use the Intrinio service, you need to install the [certifi package](https://github.com/certifi/python-certifi)
+package. The easiest way to do this is to open a terminal and enter the following commmand.
+
+```
+pip install certifi
+```
+
+This will install the certifi package for the system. If you are using Python virtual environments,
+you can install certifi in a VENV by activating the VENV and running the
+same command. The important file in the certifi package is cacert.pem.
+
+On a stock macOS system the cacert.pem file should be found at
+```
+/Library/Python/X.X/site-packages/certifi/cacert.pem
+```
+where X.X is the version of Python. Typically the version will be something
+like 2.7. You will need the location of the cacert.pem file to set
+up the Intrinio service.
+
+##### Linux/Ubuntu
+
+To be determined.
+
+##### Intrinio
+
+In order to use the Intrinio service you must set up an intrinio.conf file.
+For Windows, this file goes in the LOCALAPPDATA directory.
+
+```
+c:\Users\username\AppData\Local\libreoffice\intrinio\intrinio.conf
+```
+
+Here, username will be whatever your Windows user name is.
+
+For macOS and Linux, this file goes in the home directory.
+
+```
+~/username/libreoffice/intrinio/intrinio.conf
+```
+
+The intrinio.conf file is JSON formatted text specifying the Intrinio username and
+password plus the full path to the cacert.pem file. Note that the path
+to the cacert.pem file is only required for macOS. Here's an example.
+
+```
+{
+"user":"intrinio-user-id-goes-here",
+"password":"intrinio-password-goes-here",
+"certifi":"/for/macOS/path/to/certifi/cacert.pem"
+}
+```
+
+Once you have created the intrinio.conf file, you should set its file
+permissions so only you have read/write access to it. Otherwise, your
+Intrinio username and password could be exposed.
+
+#### Install Extension
+
+Once you have dealt with the prerequisites you can install the extension.
+If you have not fulfilled the prerequisites, you are likely to encounter
+errors and LibreOffice does not seem to handle errors very gracefully.
+
+1. Download the latest version of SMF.oxt [here](https://github.com/dhocker/SMF-Extension/releases/latest).
+1. Start LibreOffice.
+1. Select Menu -> Tools -> Extension Manager.
+1. Click the Add button.
+1. In the file selection dialog, navigate to where you downloaded SMF.oxt and select it.
+1. LibreOffice will install the extension. This may take some time.
+
 ### Usage
 
 The SMF Extension adds several new functions to Calc:
@@ -49,12 +180,12 @@ Refer to the web site for details.
 ### Support
 
 For general support please visit the [forums](http://forum.openoffice.org/en/forum/index.php).
-If you find a bug or wish to request a feature please file an issue at the [issue tracker](http://github.com/madsailor/SMF-Extension/issues).
+If you find a bug or wish to request a feature please file an issue at the [issue tracker](http://github.com/dhocker/SMF-Extension/issues).
 
 ### Contribute
 
 Help is always welcome with development.  If you would like to contribute you will need to fork the main repo,
-make your changes, and send a [pull request](http://github.com/madsailor/SMF-Extension/pulls) to have your
+make your changes, and send a [pull request](http://github.com/dhocker/SMF-Extension/pulls) to have your
 changes moderated and merged back into the main repo. Details on that process can be found
 [here](https://help.github.com/articles/set-up-git/).
 
