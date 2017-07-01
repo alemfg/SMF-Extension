@@ -18,6 +18,10 @@
 #  break periodically and changes to the scraping code (parsing of the
 #  web page HTML) may be required.
 #
+#  7/1/2017
+#  Added support for the Intrinio financial data service (https://intrinio.com)
+#  This support provides a closing quote for a stock on a given day.
+#
 #############################################
 #
 #  Research for possible stock data sources
@@ -49,12 +53,15 @@ import json
 import os
 import app_logger
 import sys
+import threading
 
 # Logger init
 app_logger.EnableLogging()
 logger = app_logger.getAppLogger()
-logger.debug("Python system path: %s", sys.path)
+# logger.debug("Python system path: %s", sys.path)
 
+# Configuration lock
+dialog_lock = threading.Lock()
 
 class QConfiguration:
     """
@@ -66,6 +73,8 @@ class QConfiguration:
     # Base URL for Intrinio services
     base_url = "https://api.intrinio.com"
     macOS = False
+    # Full path to the intrinio.conf file
+    full_file_path = ""
 
     @classmethod
     def load(cls):
@@ -75,6 +84,7 @@ class QConfiguration:
         access ONLY by the user.
         :return:
         """
+        global logger
         file_name = "intrinio.conf"
         file_path = ""
         if os.name == "posix":
@@ -85,11 +95,11 @@ class QConfiguration:
         elif os.name == "nt":
             # Windows
             file_path = "{0}\\libreoffice\\intrinio\\".format(os.environ["LOCALAPPDATA"])
-        full_file_path = file_path + file_name
+        QConfiguration.full_file_path = file_path + file_name
 
         # Read credentials
         try:
-            cf = open(full_file_path, "r")
+            cf = open(QConfiguration.full_file_path, "r")
             cfj = json.loads(cf.read())
             cls.auth_user = cfj["user"]
             cls.auth_passwd = cfj["password"]
@@ -97,11 +107,45 @@ class QConfiguration:
             if "certifi" in cfj:
                 cls.cacerts = cfj["certifi"]
             cf.close()
+            logger.debug("intrinio.conf loaded")
         except FileNotFoundError as ex:
-            logger.debug("%s was not found", full_file_path)
+            logger.debug("%s was not found", QConfiguration.full_file_path)
         except Exception as ex:
             logger.debug("An exception occurred while attempting to load intrinio.conf")
             logger.debug(str(ex))
+
+    @classmethod
+    def save(cls, username, password):
+        """
+        Save configuraton back to intrinio.conf
+        :return:
+        """
+        QConfiguration.auth_user = username
+        QConfiguration.auth_passwd = password
+
+        conf = {}
+        conf["user"] = QConfiguration.auth_user
+        conf["password"] = QConfiguration.auth_passwd
+        conf["certifi"] = QConfiguration.cacerts
+
+        cf = open(QConfiguration.full_file_path, "w")
+        json.dump(conf, cf, indent=4)
+        cf.close()
+
+        if os.name == "posix":
+            import stat
+            # The user gets R/W permissions
+            os.chmod(QConfiguration.full_file_path, stat.S_IRUSR | stat.S_IWUSR)
+        else:
+            pass
+
+    @classmethod
+    def is_configured(cls):
+        """
+        Intrinio is configured if there is a user and password in the intrinio.conf file.
+        :return:
+        """
+        return QConfiguration.auth_user and QConfiguration.auth_passwd
 
 # Initialize Intrinio configuration
 QConfiguration.load()
@@ -180,6 +224,7 @@ class IntrinioBase:
         :param url_string:
         :return:
         """
+        global logger
         print(url_string)
         Quote.setup_authorization(url_string)
         try:
@@ -292,6 +337,26 @@ def intrinio_fetch_data(self, ticker, tgtdate):
     :param tgtdate: string or float (libreoffice date) - for date of interest
     :return: For numeric values returns a float. Otherwise, returns a string.
     """
+    global dialog_lock
+    global logger
+
+    # Force Intrinio configuration. Even if the configuration attempt
+    # fails, we'll continue on because the request might hit cache.
+    # Only if we need to call Intrinio will we fail the request.
+    if not QConfiguration.is_configured():
+        try:
+            if dialog_lock.acquire(blocking=False):
+                logger.debug("Calling intrinio_login()")
+                res = intrinio_login()
+                if res:
+                    QConfiguration.save(res[0], res[1])
+                else:
+                    logger.error("intrinio_login() returned false")
+                dialog_lock.release()
+            else:
+                logger.warn("Intrinio configuration dialog is already active")
+        except Exception as ex:
+            logger.error("intrinio_login() failed %s", str(ex))
 
     # Resolve date. It can be a LibreCalc date as a float or a string date
     if type(tgtdate) == float:
@@ -317,7 +382,7 @@ def intrinio_fetch_data(self, ticker, tgtdate):
         return v
 
     # We need intrinio.conf to use Intrinio
-    if not QConfiguration.auth_user:
+    if not QConfiguration.is_configured():
         return "intrinio.conf is missing or in error"
 
     # Use Intrinio to get historical data
@@ -422,20 +487,116 @@ def __insert_symbol(symbol, tgtdate, close):
     conn.commit()
     conn.close()
 
-"""
-Test code
-"""
-if __name__ == "__main__":
-    q = Quote.get_quote("usibx", "2017-05-31")
-    print (q.close)
-    q = Quote.get_quote("vym", "2017-05-31")
-    print (q.close)
-    q = Quote.get_quote("INDEXDJX:.DJI", "2017-05-31")
-    print (q.close)
-    q = Quote.get_quote("INDEXSP:.INX", "2017-05-31")
-    print (q.close)
-    q = Quote.get_quote("INDEXNASDAQ:.IXIC", "2017-05-31")
-    print (q.close)
+#
+# Intrinio login dialog
+# Adapted from https://forum.openoffice.org/en/forum/viewtopic.php?f=45&t=56397#p248794
+#
+
+try:
+    import uno
+    logger.debug("Attempt to import uno succeeded")
+    # logger.debug("sys.path = %s", sys.path)
+except Exception as ex:
+    logger.error("Attempt to import uno failed %s", str(ex))
+try:
+    # https://www.openoffice.org/api/docs/common/ref/com/sun/star/awt/PosSize.html
+    from com.sun.star.awt.PosSize import POSSIZE # flags the x- and y-coordinate, width and height
+    logger.debug("Attempt to import com.sun.star.awt.PosSize succeeded")
+except Exception as ex:
+    logger.error("Attempt to import com.sun.star.awt.PosSize failed %s", str(ex))
+
+
+def add_awt_model(dlg_model, srv, ctl_name, prop_list):
+    '''
+    Helper function for building dialog
+    Insert UnoControl<srv>Model into given DialogControlModel oDM by given sName and properties dProps
+    '''
+    ctl_model = dlg_model.createInstance("com.sun.star.awt.UnoControl" + srv + "Model")
+    while prop_list:
+        prp = prop_list.popitem()
+        uno.invoke(ctl_model,"setPropertyValue",(prp[0],prp[1]))
+        #works with awt.UnoControlDialogElement only:
+        ctl_model.Name = ctl_name
+    dlg_model.insertByName(ctl_name, ctl_model)
+
+
+def intrinio_login():
+    """
+    Ask user for Intrinio login credentials
+    :return: If successful, returns username and password as a tuple (something truthy)
+    If canceled, returns False.
+    """
+    # Reference: https://www.openoffice.org/api/docs/common/ref/com/sun/star/awt/module-ix.html
+    global logger
+
+    ctx = uno.getComponentContext()
+    smgr = ctx.ServiceManager
+    dlg_model = smgr.createInstance("com.sun.star.awt.UnoControlDialogModel")
+    dlg_model.Title = 'Intrinio Access Keys'
+    add_awt_model(dlg_model, 'FixedText', 'lblName', {
+        'Label': 'User Name',
+    }
+                  )
+    add_awt_model(dlg_model, 'Edit', 'txtName', {})
+    add_awt_model(dlg_model, 'FixedText', 'lblPWD', {
+        'Label': 'Password',
+    }
+                  )
+    add_awt_model(dlg_model, 'Edit', 'txtPWD', {
+        'EchoChar': 42,
+    }
+                  )
+    add_awt_model(dlg_model, 'Button', 'btnOK', {
+        'Label': 'Save',
+        'DefaultButton': True,
+        'PushButtonType': 1,
+    }
+                  )
+    add_awt_model(dlg_model, 'Button', 'btnCancel', {
+        'Label': 'Cancel',
+        'PushButtonType': 2,
+    }
+                  )
+
+    lmargin = 10  # left margin
+    rmargin = 10  # right margin
+    tmargin = 10  # top margin
+    bmargin = 10  # bottom margin
+    cheight = 25  # control height
+    pad = 5  # top/bottom padding where needed
+    theight = cheight + pad  # total height of a control
+
+    # Poor man's grid
+    # layout "control-name", [x, y, w, h]
+    layout = {
+        "lblName": [lmargin, tmargin, 100, cheight],
+        "txtName": [lmargin + 100, tmargin, 250, cheight],
+        "lblPWD": [lmargin, tmargin + (theight * 1), 100, cheight],
+        "txtPWD": [lmargin + 100, tmargin + (theight * 1), 250, cheight],
+        "btnOK": [lmargin + 100, tmargin + (theight * 2), 100, cheight],
+        "btnCancel": [lmargin + 200, tmargin + (theight * 2), 100, cheight]
+    }
+
+    dialog = smgr.createInstance("com.sun.star.awt.UnoControlDialog")
+    dialog.setModel(dlg_model)
+    name_ctl = dialog.getControl('txtName')
+    pass_ctl = dialog.getControl('txtPWD')
+
+    # Apply layout to controls. Must be done within the dialog.
+    for name, d in layout.items():
+        ctl = dialog.getControl(name)
+        ctl.setPosSize(d[0], d[1], d[2], d[3], POSSIZE)
+
+    dialog.setPosSize(300, 300, lmargin + rmargin + 100 + 250, tmargin + bmargin + (theight * 3), POSSIZE)
+    dialog.setVisible(True)
+
+    # Run the dialog. Returns the value of the PushButtonType.
+    x = dialog.execute()
+    logger.debug("intrinio login dialog returned: %s", x)
+    if x == 1:
+        return (name_ctl.getText(), pass_ctl.getText())
+    else:
+        return False
 
 
 """
@@ -476,3 +637,18 @@ view-source:https://www.google.com/finance/historical?q=.ixic&startdate=2017-05-
 <td class="rgt rm">-
 </table>
 """
+
+"""
+Test code
+"""
+# if __name__ == "__main__":
+#     q = Quote.get_quote("usibx", "2017-05-31")
+#     print (q.close)
+#     q = Quote.get_quote("vym", "2017-05-31")
+#     print (q.close)
+#     q = Quote.get_quote("INDEXDJX:.DJI", "2017-05-31")
+#     print (q.close)
+#     q = Quote.get_quote("INDEXSP:.INX", "2017-05-31")
+#     print (q.close)
+#     q = Quote.get_quote("INDEXNASDAQ:.IXIC", "2017-05-31")
+#     print (q.close)

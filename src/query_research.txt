@@ -158,3 +158,68 @@ Type "help", "copyright", "credits" or "license" for more information.
 '/Applications/LibreOffice.app/Contents/Frameworks/LibreOfficePython.framework/Versions/3.5/lib/python3.5/lib-dynload',
 '/Applications/LibreOffice.app/Contents/Frameworks/LibreOfficePython.framework/Versions/3.5/lib/python3.5/site-packages'
 ]
+
+####
+Dialog
+https://forum.openoffice.org/en/forum/viewtopic.php?f=45&t=56397#
+####
+
+import uno # <- Where does this come from?
+from com.sun.star.awt.PosSize import POSSIZE
+
+def addAwtModel(oDM,srv,sName,dProps):
+    '''Insert UnoControl<srv>Model into given DialogControlModel oDM by given sName and properties dProps'''
+    oCM = oDM.createInstance("com.sun.star.awt.UnoControl"+ srv +"Model")
+    while dProps:
+        prp = dProps.popitem()
+        uno.invoke(oCM,"setPropertyValue",(prp[0],prp[1]))
+        #works with awt.UnoControlDialogElement only:
+        oCM.Name = sName
+    oDM.insertByName(sName,oCM)
+
+def getLogin():
+    ctx = uno.getComponentContext()
+    smgr = ctx.ServiceManager
+    oDM = smgr.createInstance("com.sun.star.awt.UnoControlDialogModel")
+    oDM.Title = 'Login Dialog'
+    addAwtModel(oDM,'FixedText','lblName',{
+        'Label' : 'User Name',
+        }
+                )
+    addAwtModel(oDM,'Edit','txtName',{})
+    addAwtModel(oDM,'FixedText','lblPWD',{
+        'Label' : 'Password',
+        }
+                )
+    addAwtModel(oDM,'Edit','txtPWD',{
+        'EchoChar' : 42,
+        }
+                )
+    addAwtModel(oDM,'Button','btnOK',{
+        'Label' : 'OK',
+        'DefaultButton' : True,
+        'PushButtonType' : 1,
+        }
+                )
+    addAwtModel(oDM,'Button','btnCancel',{
+        'Label' : 'Cancel',
+        'PushButtonType' : 2,
+        }
+                )
+
+    oDialog = smgr.createInstance("com.sun.star.awt.UnoControlDialog")
+    oDialog.setModel(oDM)
+    txtN = oDialog.getControl('txtName')
+    txtP = oDialog.getControl('txtPWD')
+    h = 25
+    y = 10
+    for c in oDialog.getControls():
+        c.setPosSize(10, y, 200, h, POSSIZE)
+        y += h
+    oDialog.setPosSize(300,300,300,y+h,POSSIZE)
+    oDialog.setVisible(True)
+    x = oDialog.execute()
+    if x:
+        return (txtN.getText(),txtP.getText())
+    else:
+        return False

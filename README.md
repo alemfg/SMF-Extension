@@ -130,6 +130,14 @@ Once you have created the intrinio.conf file, you should set its file
 permissions so only you have read/write access to it. Otherwise, your
 Intrinio username and password could be exposed.
 
+If you open a LibreOffice Calc file containing Intrinio references before
+creating the intrinio.conf file, the extension will prompt you for Intrinio
+access credentials. However, it does not do anything with the cacert.pem
+file. In this case, the intrinio.conf file will be created for you. If
+you are on Windows all you will have to do is set the file permissions
+on intrinio.conf. On macOS you will still need to edit the intrinio.conf
+file for the cacert.pem location.
+
 #### Install Extension
 
 Once you have dealt with the prerequisites you can install the extension.
