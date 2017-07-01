@@ -267,12 +267,14 @@ class Quote(IntrinioBase):
 
         # Get the web page source
         try:
+            logger.debug("Calling Google Finance: %s", url_string)
             html_lines = urllib.request.urlopen(url_string).readlines()
             html_str = ""
             for line in html_lines:
                 html_str += str(line, "utf-8")
         except urllib.error.HTTPError as ex:
-            print (ex.msg)
+            logger.debug("Exception attempting to call Google Finance")
+            logger.debug(ex.msg)
             return None
 
         # Run parser over page source, extracting data of interest
@@ -315,6 +317,7 @@ def fetch_data(self, ticker, tgtdate):
         # Assumed to be a string in ISO format.
         eff_date = tgtdate
     else:
+        logger.debug("Unsuported date format type: {0} value: {1}".format(type(tgtdate), tgtdate))
         return "Unsuported date format type: {0} value: {1}".format(type(tgtdate), tgtdate)
 
     # return "type: {0} value: {1}".format(type(tgtdate), eff_date)
@@ -324,6 +327,7 @@ def fetch_data(self, ticker, tgtdate):
     # needed for a ticker/date combination.
     cr = __lookup_symbol_by_date(ticker, eff_date)
     if cr:
+        logger.debug("Google Finance cache hit for %s %s", ticker, eff_date)
         print ("Cache hit")
         cv = cr["Close"]
         try:
@@ -384,7 +388,7 @@ def intrinio_fetch_data(self, ticker, tgtdate):
     # needed for a ticker/date combination.
     cr = __lookup_symbol_by_date(ticker, eff_date)
     if cr:
-        logger.debug("Cache hit for %s %s", ticker, eff_date)
+        logger.debug("Intrinio cache hit for %s %s", ticker, eff_date)
         cv = cr["Close"]
         try:
             v = float(cv)
