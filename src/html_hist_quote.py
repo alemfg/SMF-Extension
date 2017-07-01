@@ -51,6 +51,7 @@ import ssl
 import datetime
 import json
 import os
+import os.path
 import app_logger
 import sys
 import threading
@@ -104,8 +105,14 @@ class QConfiguration:
             cls.auth_user = cfj["user"]
             cls.auth_passwd = cfj["password"]
             # certifi is required for macOS
-            if "certifi" in cfj:
-                cls.cacerts = cfj["certifi"]
+            if QConfiguration.macOS:
+                if "certifi" in cfj:
+                    cls.cacerts = cfj["certifi"]
+                    if not os.path.exists(cls.cacerts):
+                        logger.error("certifi path does not exist: %s", cls.cacerts)
+                        cls.cacerts = ""
+                else:
+                    logger.error("intrinio.conf does not contain a definition for certifi")
             cf.close()
             logger.debug("intrinio.conf loaded")
         except FileNotFoundError as ex:
@@ -145,6 +152,8 @@ class QConfiguration:
         Intrinio is configured if there is a user and password in the intrinio.conf file.
         :return:
         """
+        if QConfiguration.macOS:
+            return QConfiguration.auth_user and QConfiguration.auth_passwd and QConfiguration.cacerts
         return QConfiguration.auth_user and QConfiguration.auth_passwd
 
 # Initialize Intrinio configuration
@@ -208,6 +217,8 @@ class IntrinioBase:
             # This works on macOS 10.12.5 Sierra. Why is unclear. It literally took days to
             # find this as a working solution.
             # See: https://github.com/certifi/python-certifi and https://pypi.python.org/pypi/certifi
+            if not QConfiguration.cacerts:
+                logger("Intrinio call will fail because intrinio.conf certfi key is invalid or missing")
             ssl_ctx = ssl.create_default_context(cafile=QConfiguration.cacerts)
             httpshandler = urllib.request.HTTPSHandler(context=ssl_ctx)
             opener = urllib.request.build_opener(httpshandler, authhandler)
@@ -383,7 +394,7 @@ def intrinio_fetch_data(self, ticker, tgtdate):
 
     # We need intrinio.conf to use Intrinio
     if not QConfiguration.is_configured():
-        return "intrinio.conf is missing or in error"
+        return "intrinio.conf is missing, incomplete or in error"
 
     # Use Intrinio to get historical data
     q = Quote.get_intrinio_quote(ticker, eff_date)

@@ -16,7 +16,7 @@ cur_dir = os.getcwd()
 
 # A unique ID for the extension.
 addin_id = "com.smf.ticker.getinfo"
-addin_version = "0.9.27"
+addin_version = "0.9.28"
 addin_displayname = "Stock Market Function Extension (Forked Version)"
 addin_publisher_link = "https://github.com/dhocker/SMF-Extension"
 addin_publisher_name = "TheAgency"
