@@ -52,12 +52,12 @@ import datetime
 import json
 import os
 import os.path
-import app_logger
+from app_logger import AppLogger
 import sys
 import threading
 
 # Logger init
-app_logger.EnableLogging()
+app_logger = AppLogger("smf-extension")
 logger = app_logger.getAppLogger()
 # logger.debug("Python system path: %s", sys.path)
 
