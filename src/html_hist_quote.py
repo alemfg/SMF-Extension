@@ -260,15 +260,16 @@ class Quote(IntrinioBase):
 
     @staticmethod
     def get_quote(ticker, start_date):
-        url_string = "http://www.google.com/finance/historical?q={0}".format(ticker)
-        url_string += "&startdate={0}&enddate={0}&output=html".format(
+        url_string = "https://finance.google.com/finance/historical?q={0}".format(ticker)
+        url_string_opt = "&startdate={0}&enddate={0}".format(
                           start_date)
+        uue_url_string = url_string + url_string_opt
         # print (url_string)
 
         # Get the web page source
         try:
-            logger.debug("Calling Google Finance: %s", url_string)
-            html_lines = urllib.request.urlopen(url_string).readlines()
+            logger.debug("Calling Google Finance: %s", uue_url_string)
+            html_lines = urllib.request.urlopen(uue_url_string).readlines()
             html_str = ""
             for line in html_lines:
                 html_str += str(line, "utf-8")
@@ -656,9 +657,9 @@ view-source:https://www.google.com/finance/historical?q=.ixic&startdate=2017-05-
 """
 Test code
 """
-# if __name__ == "__main__":
-#     q = Quote.get_quote("usibx", "2017-05-31")
-#     print (q.close)
+if __name__ == "__main__":
+    q = Quote.get_quote("usibx", "2017-09-29")
+    print (q.close)
 #     q = Quote.get_quote("vym", "2017-05-31")
 #     print (q.close)
 #     q = Quote.get_quote("INDEXDJX:.DJI", "2017-05-31")
