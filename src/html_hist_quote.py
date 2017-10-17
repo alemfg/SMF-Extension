@@ -96,6 +96,12 @@ class QConfiguration:
         elif os.name == "nt":
             # Windows
             file_path = "{0}\\libreoffice\\intrinio\\".format(os.environ["LOCALAPPDATA"])
+
+        # Create directory if it doesn't exist
+        # In reality, the directory should exist because the logger also checks
+        if not os.path.exists(file_path):
+            os.makedirs(file_path, exist_ok=True)
+        # Manufacture full path to configuration file
         QConfiguration.full_file_path = file_path + file_name
 
         # Read credentials
