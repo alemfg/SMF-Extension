@@ -55,21 +55,23 @@ There are two major steps for installation.
 
 ##### Windows
 
-If you want to run the SMF Extension under Windows, it is recomended that
-you install the latest version of [Python 3](https://www.python.org/downloads/).
+If you want to run the SMF Extension under Windows,
+you need to install the full version of [Python 3](https://www.python.org/downloads/)
+that is used with LibreOffice. For LibreOffice 5 and 6 Python 3.5.1 should work.
 Be sure to note where you install it. For simplicity, you might consider
-installing to C:\python36 or C:\python3.
+installing to C:\python35 or C:\Program Files\python35. Be sure to install the 
+x86_64 version (aka the 64-bit version).
 
-After you install Python 3, go to the Control Panel and set up the
+After you install Python 3.5.1, go to the Control Panel and set up the
 PYTHONPATH variable. Open the menu and type **environment variables**.
 This should lead you to the System Properties dialog box. Click on the
 **Environment Variables** button.
 
 Create a new **user** variable named PYTHONPATH. Set the value to the following.
 ```
-c:\python33;c:\python33\Lib;c:\python33\Lib\site-packages;c:\python33\Lib\sqlite3;c:\python33\DLLs
+c:\python35;c:\python35\Lib;c:\python35\Lib\site-packages;c:\python35\Lib\sqlite3;c:\python35\DLLs
 ```
-This assumes you installed Python 3 to C:\python33. If you installed to a
+This assumes you installed Python 3.5.1 to C:\python35. If you installed to a
 different directory, adjust accordingly.
 
 ##### macOS
