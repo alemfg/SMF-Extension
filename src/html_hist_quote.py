@@ -55,6 +55,7 @@ import os.path
 from app_logger import AppLogger
 import sys
 import threading
+import inspect
 
 # Logger init
 app_logger = AppLogger("smf-extension")
@@ -110,15 +111,6 @@ class QConfiguration:
             cfj = json.loads(cf.read())
             cls.auth_user = cfj["user"]
             cls.auth_passwd = cfj["password"]
-            # certifi is required for macOS
-            if QConfiguration.macOS:
-                if "certifi" in cfj:
-                    cls.cacerts = cfj["certifi"]
-                    if not os.path.exists(cls.cacerts):
-                        logger.error("certifi path does not exist: %s", cls.cacerts)
-                        cls.cacerts = ""
-                else:
-                    logger.error("intrinio.conf does not contain a definition for certifi")
             cf.close()
             logger.debug("intrinio.conf loaded")
         except FileNotFoundError as ex:
@@ -126,6 +118,21 @@ class QConfiguration:
         except Exception as ex:
             logger.debug("An exception occurred while attempting to load intrinio.conf")
             logger.debug(str(ex))
+
+        # Set up path to certs
+        cls.cwd = os.path.realpath(os.path.abspath
+                                          (os.path.split(inspect.getfile
+                                                         (inspect.currentframe()))[0]))
+        # The embedded versio of Python found in some versions of LO Calc
+        # does not handle certificates. Here we compensate by using the certificate
+        # package from the certifi project: https://github.com/certifi/python-certifi
+        if os.name == "posix":
+            cls.cacerts = "{0}/cacert.pem".format(cls.cwd)
+        elif os.name == "nt":
+            # This may not be necessary in Windows
+            cls.cacerts = "{0}\\cacert.pem".format(cls.cwd)
+
+        cls.log_configuration()
 
     @classmethod
     def save(cls, username, password):
@@ -139,7 +146,6 @@ class QConfiguration:
         conf = {}
         conf["user"] = QConfiguration.auth_user
         conf["password"] = QConfiguration.auth_passwd
-        conf["certifi"] = QConfiguration.cacerts
 
         cf = open(QConfiguration.full_file_path, "w")
         json.dump(conf, cf, indent=4)
@@ -151,6 +157,24 @@ class QConfiguration:
             os.chmod(QConfiguration.full_file_path, stat.S_IRUSR | stat.S_IWUSR)
         else:
             pass
+
+    @classmethod
+    def log_configuration(cls):
+        logger.info("Current Configuration")
+        logger.info("user: %s", cls.get_masked_user())
+        logger.info("password: %s", cls.get_masked_password())
+        logger.info("certifi: %s", cls.cacerts)
+
+    @classmethod
+    def get_masked_user(cls):
+        return cls.auth_user[:int(len(cls.auth_user) / 2)] + ("*" * int(len(cls.auth_user) / 2))
+
+    @classmethod
+    def get_masked_password(cls):
+        pwl = len(cls.auth_passwd)
+        uml = int(pwl / 4)
+        ml = pwl - uml
+        return cls.auth_passwd[:uml] + ("*" * ml)
 
     @classmethod
     def is_configured(cls):

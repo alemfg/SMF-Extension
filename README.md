@@ -29,9 +29,8 @@ instructions below.
 
 Some of the web services used by the forked SMF Extension require secure connections through HTTPS.
 The urllib package in the embedded version of Python does not recognize or use the CA certificates
-installed under macOS. To compensate for this issue you will need to install the
-[certifi package](https://github.com/certifi/python-certifi) and create an intrinio.conf file.
-Refer to the prerequisite installation instructions below.
+installed under macOS. To compensate for this issue, the SMF extension includes the cacert.pem file from the
+[certifi package](https://github.com/certifi/python-certifi).
 
 #### Linux/Ubuntu
 
@@ -76,24 +75,7 @@ different directory, adjust accordingly.
 
 ##### macOS
 
-If you want to use the Intrinio service, you need to install the [certifi package](https://github.com/certifi/python-certifi)
-package. The easiest way to do this is to open a terminal and enter the following commmand.
-
-```
-pip install certifi
-```
-
-This will install the certifi package for the system. If you are using Python virtual environments,
-you can install certifi in a VENV by activating the VENV and running the
-same command. The important file in the certifi package is cacert.pem.
-
-On a stock macOS system the cacert.pem file should be found at
-```
-/Library/Python/X.X/site-packages/certifi/cacert.pem
-```
-where X.X is the version of Python. Typically the version will be something
-like 2.7. You will need the location of the cacert.pem file to set
-up the Intrinio service.
+None.
 
 ##### Linux/Ubuntu
 

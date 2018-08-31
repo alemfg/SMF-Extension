@@ -30,6 +30,7 @@ cp -f "${PWD}"/src/yahoo_hist.py "${PWD}"/SMF/
 cp -f "${PWD}"/src/html_hist_quote.py "${PWD}"/SMF/
 cp -f "${PWD}"/src/app_logger.py "${PWD}"/SMF/
 cp -f "${PWD}"/src/description-en-US.txt "${PWD}"/SMF/
+cp -f "${PWD}"/certifi/cacert.pem "${PWD}"/SMF/
 python "${PWD}"/src/generate_metainfo.py
 
 #Package into oxt file
